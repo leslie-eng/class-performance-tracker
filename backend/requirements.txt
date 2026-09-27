@@ -1,0 +1,14 @@
+fastapi>=0.141
+uvicorn[standard]>=0.54
+sqlalchemy>=2.1
+psycopg[binary]>=3.2
+alembic>=1.20
+pydantic[email]>=2.13
+pydantic-settings>=2.6
+pyjwt>=2.10
+bcrypt>=4.2
+python-multipart>=0.0.20
+httpx>=0.28
+beautifulsoup4>=4.12
+anthropic>=1.8
+apscheduler>=3.11,<4

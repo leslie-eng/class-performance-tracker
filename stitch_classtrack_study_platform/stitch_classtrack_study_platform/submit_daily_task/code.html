@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-primary-fixed-variant":"#003ea8","on-primary":"#ffffff","on-tertiary":"#ffffff","surface-container-highest":"#dae2fd","on-surface-variant":"#434655","tertiary":"#784b00","background":"#faf8ff","inverse-on-surface":"#eef0ff","on-secondary-fixed":"#002109","on-background":"#131b2e","secondary-fixed":"#6bff8f","primary-fixed-dim":"#b4c5ff","on-secondary-container":"#007432","on-primary-container":"#eeefff","on-error":"#ffffff","on-secondary-fixed-variant":"#005321","secondary-container":"#6bff8f","surface":"#faf8ff","outline-variant":"#c3c6d7","inverse-primary":"#b4c5ff","on-tertiary-container":"#ffeedd","surface-container-lowest":"#ffffff","surface-variant":"#dae2fd","on-tertiary-fixed-variant":"#653e00","surface-tint":"#0053db","error-container":"#ffdad6","tertiary-container":"#996100","outline":"#737686","secondary":"#006e2f","tertiary-fixed-dim":"#ffb95f","secondary-fixed-dim":"#4ae176","on-secondary":"#ffffff","surface-container-high":"#e2e7ff","surface-dim":"#d2d9f4","surface-container":"#eaedff","primary":"#004ac6","inverse-surface":"#283044","primary-fixed":"#dbe1ff","error":"#ba1a1a","tertiary-fixed":"#ffddb8","on-error-container":"#93000a","on-primary-fixed":"#00174b","primary-container":"#2563eb","surface-container-low":"#f2f3ff","on-surface":"#131b2e","on-tertiary-fixed":"#2a1700","surface-bright":"#faf8ff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-sm":"0.5rem","gutter":"1.5rem","margin-sm":"1rem","margin":"2rem","space-lg":"1.5rem","space-xl":"2rem","gutter-sm":"1rem","space-md":"1rem","space-xs":"0.25rem"},"fontFamily":{"label-sm":["JetBrains Mono"],"headline-lg":["Inter"],"body-lg":["Inter"],"headline-md":["Inter"],"body-sm":["Inter"],"headline-xl-mobile":["Inter"],"body-md":["Inter"],"label-md":["JetBrains Mono"],"headline-xl":["Inter"]},"fontSize":{"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.02em","fontWeight":"500"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","letterSpacing":"-0.011em","fontWeight":"400"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","letterSpacing":"0em","fontWeight":"400"}],"headline-xl-mobile":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","letterSpacing":"-0.006em","fontWeight":"400"}],"label-md":["13px",{"lineHeight":"18px","letterSpacing":"-0.01em","fontWeight":"500"}],"headline-xl":["36px",{"lineHeight":"44px","letterSpacing":"-0.025em","fontWeight":"700"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-[1440px] mx-auto px-margin flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md shrink-0"><a class="flex items-center gap-space-xs" data-path="dashboard" href="#"><img alt="ClassTrack Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VNA7yvZgQ00UctVR4conNr4uLw3uxlWsMnVx2jh-AR8vceZ-_uKxqTz4_qXdrGYWJOWKA9NM9SWDmVeWD_RtgNa3svB4OrF3v8J92Uyd7nYH5MZ01oIpzaAa6dIjTJjd_95KVZ7YzsFy1Pt5RPKpETpXRwp8Xm-cUieQKK0POPByJyk_7I7HLMKV9YSxfiISf1i5GU2zeNPUjr9CcxQ9sa6zh7qj7TJWmGTDiJvlp6Ehjm5HBZK1_ob8UJ"/><span class="font-headline-md text-headline-md tracking-tight text-on-surface hidden sm:inline-block">ClassTrack</span></a><div class="h-5 w-px bg-surface-container-high hidden md:block"></div><button class="hidden lg:flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-low hover:bg-surface-container-high transition-colors" type="button"><span class="w-2 h-2 rounded-full bg-secondary shrink-0"></span><span class="font-label-sm text-label-sm text-on-surface truncate max-w-[210px]">🐍 100 Days of Python v2.4 (Cohort 8)</span><span class="material-symbols-outlined text-[18px] text-on-surface-variant">expand_more</span></button></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-primary-container text-on-primary font-headline-md"><a class="px-space-sm py-1.5 rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="dashboard" href="#">Dashboard</a><a aria-current="page" class="px-space-sm py-1.5 rounded-lg transition-colors bg-primary-container text-on-primary font-headline-md" data-path="submit-task" href="#">Submit Task</a><a class="px-space-sm py-1.5 rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="leaderboard" href="#">Leaderboard</a><a class="px-space-sm py-1.5 rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="ai-grading" href="#">AI Grading</a><a class="px-space-sm py-1.5 rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="job-tracker" href="#">Job Tracker</a></nav><div class="flex items-center gap-space-sm shrink-0"><button class="hidden sm:flex items-center gap-space-xs px-space-sm py-1.5 rounded-lg bg-surface-container-lowest shadow-[0_1px_2px_rgba(0,0,0,0.04)] text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">search</span><span class="font-body-sm text-body-sm hidden md:inline">Search tasks, peers...</span><kbd class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant">⌘K</kbd></button><div class="flex items-center gap-1 px-space-sm py-1 rounded-full bg-tertiary-fixed text-tertiary-container shadow-[0_1px_2px_rgba(0,0,0,0.04)]"><span class="text-[14px]">🔥</span><span class="font-label-md text-label-md font-bold">12 Days</span></div><button class="relative p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1 right-1 w-4 h-4 rounded-full bg-error text-on-error font-label-sm text-[10px] flex items-center justify-center leading-none">3</span></button><div class="h-6 w-px bg-surface-container-high"></div><div class="flex items-center gap-space-xs"><div class="relative"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbboR3dQGo22Tcss2Rx2RoJboaeKqE-ImjYCJv_-E-8VKHG_-LCnskgArDyFnQVzXglLdzL-dubqJc1GbvFVDSOMsUzuHOjxuILacfWyNqwGVE9gTmBZyjt_51DzC4WNC4F_R-B-ET_msfDFj3EwxLd36IvSpiS5rqAAWsmpWJQaI18AB-Oix1Q3GPP2Cm7hEp78XHWUj70wjvrbphFoPMeO590XSQWkz4wTMWWYk8w8ecq8tEyL4cXw"/><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-secondary ring-2 ring-surface"></span></div><span class="font-body-md text-body-md text-on-surface hidden lg:inline font-medium">Maya Patel</span></div></div></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-80px)]"><div class="flex flex-col w-full">
+<div class="max-w-[1440px] w-full mx-auto px-margin py-space-lg flex flex-col gap-space-lg">
+<!-- Top Breadcrumbs & Page Context -->
+<div class="flex flex-col gap-space-xs">
+<nav aria-label="Breadcrumb" class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<a class="hover:text-primary transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[16px]">folder_open</span>
+<span>Challenges</span>
+</a>
+<span class="text-outline-variant">/</span>
+<a class="hover:text-primary transition-colors" href="#">100 Days of Python</a>
+<span class="text-outline-variant">/</span>
+<span class="font-medium text-on-surface">Submit Task</span>
+</nav>
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pt-space-xs">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Daily Task Submission</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Log your daily build, share technical insights, and lock in your cohort momentum.</p>
+</div>
+<!-- Deadline & Streak Pill Context -->
+<div class="flex flex-wrap items-center gap-space-sm">
+<div class="flex items-center gap-2 px-space-md py-1.5 rounded-xl bg-tertiary-fixed text-tertiary-container shadow-sm">
+<span class="text-[18px]">🔥</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary font-bold">Active Streak</span>
+<span class="font-label-md text-label-md font-bold text-on-tertiary-fixed leading-none">12 Days</span>
+</div>
+</div>
+<div class="flex items-center gap-2 px-space-md py-1.5 rounded-xl bg-surface-container-high text-on-surface shadow-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">timer</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Cohort Cutoff</span>
+<span class="font-label-md text-label-md font-bold text-primary leading-none" id="countdown">Due in 06:42:15</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Challenge Context Banner -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container p-space-md shadow-sm">
+<div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary flex items-center justify-center font-label-md text-label-md font-bold shrink-0 shadow-sm">
+            D47
+          </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm font-semibold px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed">CORE SPRINT 4</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">System Architecture</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface pt-0.5">Redis Distributed Caching &amp; Celery Background Workers</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Implement cache-aside pattern with TTL invalidation, connection pool failover, and celery async task retries.</p>
+</div>
+</div>
+<div class="flex items-center gap-space-sm shrink-0">
+<a class="px-space-sm py-1.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-high transition-colors font-body-sm text-body-sm flex items-center gap-1.5 shadow-sm" href="#">
+<span class="material-symbols-outlined text-[16px] text-primary">description</span>
+<span>View Prompt &amp; Specs</span>
+</a>
+<div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>50 XP Available</span>
+</div>
+</div>
+</div>
+<!-- Background subtle glow -->
+<div class="absolute -right-12 -top-12 w-48 h-48 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
+</div>
+<!-- Segmented Tab Navigation -->
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<div class="inline-flex p-1 rounded-xl bg-surface-container-high shadow-sm w-full sm:w-auto" role="tablist">
+<button aria-selected="true" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-space-lg py-2 rounded-lg font-label-md text-label-md font-bold transition-all bg-surface-container-lowest text-primary shadow-sm" id="tab-code-btn" role="tab" type="button">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+<span>Code Submission</span>
+<span class="px-1.5 py-0.2 rounded-full bg-primary-fixed text-on-primary-fixed text-[10px]">Required</span>
+</button>
+<button aria-selected="false" class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-space-lg py-2 rounded-lg font-label-md text-label-md font-medium text-on-surface-variant hover:text-on-surface transition-all" id="tab-article-btn" role="tab" type="button">
+<span class="material-symbols-outlined text-[18px]">newspaper</span>
+<span>Article &amp; Deep Dive</span>
+<span class="px-1.5 py-0.2 rounded-full bg-surface-container text-on-surface-variant text-[10px]">+25 XP</span>
+</button>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-label-sm text-label-sm">
+<span class="flex h-2 w-2 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+</span>
+<span>Auto-save enabled (Draft synced 1m ago)</span>
+</div>
+</div>
+<!-- TAB 1: CODE SUBMISSION CONTENT -->
+<section class="flex flex-col gap-space-lg" id="panel-code" role="tabpanel">
+<!-- Controls Row: Selector, Language, Sync -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-space-md">
+<!-- Day Selector Dropdown -->
+<div class="md:col-span-4 flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant flex items-center gap-1" for="day-select">
+<span class="material-symbols-outlined text-[15px] text-primary">calendar_month</span>
+            Assignment Module
+          </label>
+<div class="relative">
+<select class="w-full h-10 px-space-sm pr-space-lg rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md shadow-sm appearance-none focus:outline-none" id="day-select">
+<option selected="" value="47">Day 47: Redis Distributed Caching</option>
+<option value="46">Day 46: Message Queues with RabbitMQ</option>
+<option value="45">Day 45: PostgreSQL Indexing &amp; Query Tuning</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-on-surface-variant pointer-events-none text-[18px]">unfold_more</span>
+</div>
+</div>
+<!-- Language Selector -->
+<div class="md:col-span-3 flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant flex items-center gap-1" for="lang-select">
+<span class="material-symbols-outlined text-[15px] text-secondary">code</span>
+            Runtime Environment
+          </label>
+<div class="relative">
+<select class="w-full h-10 px-space-sm pr-space-lg rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md shadow-sm appearance-none focus:outline-none" id="lang-select">
+<option selected="" value="python">🐍 Python 3.12 (Celery 5.3)</option>
+<option value="go">🦫 Go 1.22 (Asynq)</option>
+<option value="typescript">🦕 TypeScript 5.4 (BullMQ)</option>
+<option value="rust">🦀 Rust 1.77 (Redis-rs)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-on-surface-variant pointer-events-none text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- GitHub Fast Sync Input -->
+<div class="md:col-span-5 flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant flex items-center justify-between" for="gh-sync">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-on-surface">commit</span>
+              GitHub Sync Link (Optional)
+            </span>
+<span class="text-[10px] text-secondary font-bold">Auto-sync active</span>
+</label>
+<div class="relative flex items-center">
+<input class="w-full h-10 pl-space-sm pr-20 rounded-lg bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-sm focus:outline-none placeholder:text-outline" id="gh-sync" placeholder="https://github.com/..." type="url" value="https://github.com/mayapatel/100-days-python/tree/day-47"/>
+<button class="absolute right-1.5 px-2.5 py-1 rounded bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-sm text-label-sm" type="button">
+              Fetch
+            </button>
+</div>
+</div>
+</div>
+<!-- Linear / VS Code Inspired Code Editor Component -->
+<div class="rounded-xl overflow-hidden shadow-xl bg-inverse-surface text-inverse-on-surface flex flex-col">
+<!-- Editor Top Header -->
+<div class="h-11 bg-[#1a2130] px-space-md flex items-center justify-between select-none">
+<div class="flex items-center gap-space-md">
+<!-- macOS Window Controls -->
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-3 rounded-full bg-[#ef4444] inline-block shadow-sm"></span>
+<span class="w-3 h-3 rounded-full bg-[#f59e0b] inline-block shadow-sm"></span>
+<span class="w-3 h-3 rounded-full bg-[#10b981] inline-block shadow-sm"></span>
+</div>
+<!-- Active Tab -->
+<div class="flex items-center gap-2 px-space-sm py-1 rounded-t-md bg-inverse-surface text-inverse-on-surface text-label-sm font-label-sm">
+<span class="text-[#38bdf8]">py</span>
+<span class="font-medium">tasks/cache_worker.py</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+</div>
+<div class="hidden sm:flex items-center gap-1 text-outline text-label-sm font-label-sm hover:text-inverse-on-surface cursor-pointer">
+<span>tests/test_caching.py</span>
+</div>
+</div>
+<!-- Quick Editor Actions -->
+<div class="flex items-center gap-space-xs text-outline">
+<button class="p-1 hover:text-inverse-on-surface transition-colors" title="Copy code" type="button">
+<span class="material-symbols-outlined text-[18px]">content_copy</span>
+</button>
+<button class="p-1 hover:text-inverse-on-surface transition-colors" title="Format Document" type="button">
+<span class="material-symbols-outlined text-[18px]">code_blocks</span>
+</button>
+<button class="p-1 hover:text-inverse-on-surface transition-colors" title="Fullscreen" type="button">
+<span class="material-symbols-outlined text-[18px]">fullscreen</span>
+</button>
+</div>
+</div>
+<!-- Editor Workspace Area (Code + Line Numbers) -->
+<div class="flex font-label-sm text-label-sm overflow-x-auto py-space-sm px-space-xs max-h-[460px]">
+<!-- Line Numbers -->
+<div class="flex flex-col text-right text-outline select-none pr-space-md pl-space-sm opacity-60 shrink-0">
+<span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21</span><span>22</span><span>23</span><span>24</span>
+</div>
+<!-- Code Stream (Syntax Highlighted) -->
+<pre class="font-label-sm text-label-sm text-[#e2e8f0] leading-relaxed flex-1 overflow-x-auto pl-space-xs"><code><span class="text-[#c084fc]">import</span> redis.asyncio <span class="text-[#c084fc]">as</span> aioredis
+<span class="text-[#c084fc]">from</span> celery <span class="text-[#c084fc]">import</span> Celery
+<span class="text-[#c084fc]">from</span> functools <span class="text-[#c084fc]">import</span> wraps
+<span class="text-[#c084fc]">import</span> json, logging
+
+logger = logging.getLogger(<span class="text-[#38bdf8]">"worker.cache"</span>)
+celery_app = Celery(<span class="text-[#38bdf8]">"classtrack_worker"</span>, broker=<span class="text-[#38bdf8]">"redis://localhost:6379/0"</span>)
+redis_client = aioredis.from_url(<span class="text-[#38bdf8]">"redis://localhost:6379/1"</span>, decode_responses=<span class="text-[#fb923c]">True</span>)
+
+<span class="text-[#38bdf8]">@celery_app.task(bind=True, max_retries=3, default_retry_delay=10)</span>
+<span class="text-[#c084fc]">def</span> <span class="text-[#60a5fa] font-bold">invalidate_user_cache</span>(self, user_id: <span class="text-[#4ade80]">int</span>):
+    <span class="text-[#94a3b8] italic">"""Background worker invalidating user key with exponential backoff"""</span>
+    <span class="text-[#c084fc]">try</span>:
+        pattern = <span class="text-[#38bdf8]">f"user:{user_id}:*"</span>
+        redis_client.delete(pattern)
+        logger.info(<span class="text-[#38bdf8]">f"Cache purge confirmed for user_id={user_id}"</span>)
+    <span class="text-[#c084fc]">except</span> Exception <span class="text-[#c084fc]">as</span> exc:
+        logger.warning(<span class="text-[#38bdf8]">f"Cache purge failed; retrying. Error: {exc}"</span>)
+        <span class="text-[#c084fc]">raise</span> self.retry(exc=exc)
+
+<span class="text-[#c084fc]">def</span> <span class="text-[#60a5fa] font-bold">cache_response</span>(ttl: <span class="text-[#4ade80]">int</span> = <span class="text-[#fb923c]">3600</span>):
+    <span class="text-[#94a3b8] italic">"""Decorator: Cache-Aside with fallback to upstream handler"""</span>
+    <span class="text-[#c084fc]">def</span> <span class="text-[#60a5fa]">decorator</span>(func):
+        <span class="text-[#38bdf8]">@wraps(func)</span>
+        <span class="text-[#c084fc]">async def</span> <span class="text-[#60a5fa]">wrapper</span>(*args, **kwargs):
+            key = <span class="text-[#38bdf8]">f"{func.__name__}:{json.dumps(kwargs, sort_keys=True)}"</span>
+            cached = <span class="text-[#c084fc]">await</span> redis_client.get(key)
+            <span class="text-[#c084fc]">if</span> cached:
+                <span class="text-[#c084fc]">return</span> json.loads(cached)
+            result = <span class="text-[#c084fc]">await</span> func(*args, **kwargs)
+            <span class="text-[#c084fc]">await</span> redis_client.setex(key, ttl, json.dumps(result))
+            <span class="text-[#c084fc]">return</span> result
+        <span class="text-[#c084fc]">return</span> wrapper
+    <span class="text-[#c084fc]">return</span> decorator</code></pre>
+</div>
+<!-- Editor Status Footer -->
+<div class="h-8 bg-[#151c29] px-space-md flex items-center justify-between text-label-sm font-label-sm text-outline border-none select-none">
+<div class="flex items-center gap-space-md">
+<span class="flex items-center gap-1.5 text-secondary-fixed">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed animate-pulse"></span>
+<span>Python 3.12</span>
+</span>
+<span>UTF-8</span>
+<span>4 Spaces</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="flex items-center gap-1 text-secondary-fixed">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+<span>0 Lint Errors</span>
+</span>
+<span class="text-on-surface-variant">Ln 24, Col 21</span>
+</div>
+</div>
+</div>
+<!-- Verification Test Run Bar & Checklist -->
+<div class="p-space-md rounded-xl bg-surface-container-low shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<label class="relative flex items-center gap-space-sm cursor-pointer">
+<input checked="" class="w-5 h-5 rounded text-secondary accent-secondary focus:ring-0 cursor-pointer" type="checkbox"/>
+<span class="font-body-md text-body-md font-medium text-on-surface">Auto-run local test runner suite</span>
+</label>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold shadow-sm">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span>3/3 Mock tests passed ✓</span>
+</span>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-label-sm text-label-sm">
+<span>Test suite: <code class="text-primary font-bold">pytest test_caching.py</code></span>
+<span class="text-outline-variant">•</span>
+<span>142ms execution time</span>
+</div>
+</div>
+<!-- Reflection / Notes Textarea -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant flex items-center gap-1" for="submission-notes">
+<span class="material-symbols-outlined text-[15px] text-tertiary">psychology</span>
+          Daily Architectural Reflection
+        </label>
+<p class="font-body-sm text-body-sm text-on-surface-variant">What was the most challenging technical constraint or realization during this assignment?</p>
+<textarea class="w-full p-space-md rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md shadow-sm focus:outline-none resize-none leading-relaxed placeholder:text-outline" id="submission-notes" rows="3">Handling Redis connection timeouts during Celery worker retry loops required tuning socket_timeout and socket_connect_timeout parameters. Implemented exponential backoff with jitter to eliminate thundering herd spikes during Redis master failover.</textarea>
+</div>
+<!-- Submission Action Bar -->
+<div class="pt-space-sm flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm w-full sm:w-auto">
+<button class="w-full sm:w-auto px-space-lg py-2.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container font-body-md text-body-md font-medium shadow-sm transition-all flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">save</span>
+<span>Save Draft</span>
+</button>
+<span class="hidden md:inline-block font-label-sm text-label-sm text-on-surface-variant">
+            Last commit: <span class="font-mono text-primary">#c87a2e0</span>
+</span>
+</div>
+<!-- Primary CTA Button with Confetti Interactive Preview -->
+<div class="flex flex-col sm:flex-row items-center gap-space-md w-full sm:w-auto">
+<div class="hidden lg:flex items-center gap-2 px-space-md py-2 rounded-xl bg-tertiary-fixed text-on-tertiary-fixed shadow-sm">
+<span class="text-base animate-bounce">🎉</span>
+<span class="font-label-sm text-label-sm font-semibold">Submitting triggers streak milestone &amp; confetti</span>
+</div>
+<button class="w-full sm:w-auto px-space-xl py-3 rounded-lg bg-primary-container text-on-primary font-headline-md text-headline-md tracking-tight hover:bg-primary shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2" id="submit-task-btn" type="button">
+<span class="material-symbols-outlined text-[22px]">rocket_launch</span>
+<span>Submit Task (Day 47)</span>
+</button>
+</div>
+</div>
+</section>
+<!-- TAB 2: ARTICLE & DEEP DIVE CONTENT (Initially Hidden) -->
+<section class="hidden flex flex-col gap-space-lg" id="panel-article" role="tabpanel">
+<!-- Article Input Section -->
+<div class="p-space-lg rounded-xl bg-surface-container-low shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<label class="font-headline-md text-headline-md text-on-surface flex items-center gap-2" for="article-url-input">
+<span class="material-symbols-outlined text-primary text-[22px]">link</span>
+            Published Deep Dive Article URL
+          </label>
+<p class="font-body-md text-body-md text-on-surface-variant">Share your public breakdown on Medium, Dev.to, or your personal engineering blog to earn extra cohort reputation.</p>
+</div>
+<div class="flex flex-col sm:flex-row gap-space-sm items-center">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-3 text-outline text-[20px]">public</span>
+<input class="w-full h-11 pl-10 pr-space-md rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md shadow-sm focus:outline-none" id="article-url-input" placeholder="https://medium.com/@yourhandle/..." type="url" value="https://medium.com/@maya/distributed-caching-patterns-with-redis-and-fastapi"/>
+</div>
+<button class="w-full sm:w-auto px-space-lg h-11 rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md font-bold shadow-sm whitespace-nowrap transition-colors flex items-center justify-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+<span>Parse Metadata</span>
+</button>
+</div>
+</div>
+<!-- Live OpenGraph Parsed Preview & AI Evaluation Split Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+<!-- Live OpenGraph Rich Card (Col 7) -->
+<div class="lg:col-span-7 flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant">Live OpenGraph Preview</span>
+<span class="font-label-sm text-label-sm text-secondary font-bold flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+              Validated 200 OK
+            </span>
+</div>
+<div class="rounded-xl overflow-hidden bg-surface-container-lowest shadow-md flex flex-col group hover:shadow-lg transition-shadow">
+<!-- Article Cover Image -->
+<div class="relative w-full h-52 bg-surface-container overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Technical architectural diagram rendering distributed redis caching layers, message queues, and async background workers with modern sleek dark blue and neon green server nodes in clean minimalist tech aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRINNvz6pU14eldqArcr4mDDHhD2PBEcYHrM0SmwkaxYVcfCSzw0Ye4oGtXAFyuLk8Fe8qjF8f5gY_zqTqiBxLo34Lx76IuGDd8Xdl9mS4xU6AXxyWiKoYqby4NpOxvRWpE79YtMK9s_q_-ruO8D435TUI4ZJ1FjPBhWBMoIHJA92ylvk2Upj8-l6_NnYqPFIfDTGFB9dL-DZJ2rlbRkF5fcsVH6RIMbUNQeViOgOf_oiJ_gDs1O_j0A"/>
+<div class="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-inverse-surface/80 backdrop-blur-md text-inverse-on-surface font-label-sm text-label-sm flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px] text-tertiary-fixed-dim">menu_book</span>
+<span>Medium Engineering</span>
+</div>
+<div class="absolute bottom-3 right-3 px-2 py-0.5 rounded bg-surface-container-lowest/90 text-on-surface font-label-sm text-label-sm shadow-sm">
+                6 min read
+              </div>
+</div>
+<!-- Article Details -->
+<div class="p-space-md flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="font-semibold text-primary">medium.com/@maya</span>
+<span>•</span>
+<span>Published today at 09:14 AM</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold leading-snug">
+                Distributed Caching Patterns with Redis and FastAPI: Lessons from Celery Worker Scale
+              </h3>
+<p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">
+                A thorough breakdown of handling cache invalidation stampedes, multi-region replication locks, and why we decoupled task queue monitoring from cache persistence.
+              </p>
+<div class="pt-space-xs flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-surface-container-high flex items-center justify-center font-label-sm text-[10px] font-bold text-primary">MP</div>
+<span class="font-body-sm text-body-sm font-medium text-on-surface">Maya Patel</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-[11px]">#Redis</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-[11px]">#Architecture</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- AI Real-Time Grading & Pre-Score Pipeline (Col 5) -->
+<div class="lg:col-span-5 flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-on-surface-variant">Immediate Feedback Engine</span>
+<span class="font-label-sm text-label-sm text-primary font-bold">ClassTrack AI v3.2</span>
+</div>
+<!-- AI Banner -->
+<div class="p-space-md rounded-xl bg-surface-container shadow-sm flex flex-col gap-space-md">
+<div class="flex items-start gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[22px]">smart_toy</span>
+</div>
+<div class="flex flex-col">
+<h4 class="font-headline-md text-body-lg font-bold text-on-surface">Automated Synthesis &amp; Review</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">AI Assistant analyzes clarity, technical precision, code snippets, and original research within 30 seconds.</p>
+</div>
+</div>
+<!-- Real-time Scoring Skeleton & Forecast Cards -->
+<div class="flex flex-col gap-space-sm pt-space-xs">
+<!-- Metric 1: Technical Depth -->
+<div class="p-space-sm rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1.5">
+<div class="flex items-center justify-between text-body-sm">
+<span class="font-medium text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-primary">data_object</span>
+                    Technical Accuracy &amp; Syntax
+                  </span>
+<span class="font-label-md text-label-md font-bold text-secondary">98 / 100</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 98%;"></div>
+</div>
+<span class="font-label-sm text-[11px] text-on-surface-variant">Covers Cache-aside logic, TTL backoff, and idempotency reliably.</span>
+</div>
+<!-- Metric 2: Structure & Readability -->
+<div class="p-space-sm rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1.5">
+<div class="flex items-center justify-between text-body-sm">
+<span class="font-medium text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-tertiary">article</span>
+                    Editorial Clarity &amp; Flow
+                  </span>
+<span class="font-label-md text-label-md font-bold text-tertiary">92 / 100</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-tertiary-container rounded-full" style="width: 92%;"></div>
+</div>
+<span class="font-label-sm text-[11px] text-on-surface-variant">Strong section hierarchy, visual architecture block diagram included.</span>
+</div>
+<!-- Metric 3: Originality & Synthesis -->
+<div class="p-space-sm rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1.5">
+<div class="flex items-center justify-between text-body-sm">
+<span class="font-medium text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-primary">fingerprint</span>
+                    Original Thought &amp; Practicality
+                  </span>
+<span class="font-label-md text-label-md font-bold text-primary">95 / 100</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 95%;"></div>
+</div>
+<span class="font-label-sm text-[11px] text-on-surface-variant">Real production failure case study provides high cohort learning value.</span>
+</div>
+</div>
+<!-- Expected Bonus XP Pill -->
+<div class="flex items-center justify-between p-space-sm rounded-lg bg-secondary-container text-on-secondary-container">
+<span class="font-body-sm text-body-sm font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[18px]">workspace_premium</span>
+                Projected Bonus XP
+              </span>
+<span class="font-label-md text-label-md font-bold">+25 Reputation XP</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Article Action Bar -->
+<div class="pt-space-sm flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<button class="w-full sm:w-auto px-space-lg py-2.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container font-body-md text-body-md font-medium shadow-sm transition-all flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">refresh</span>
+<span>Re-inspect OpenGraph Data</span>
+</button>
+<button class="w-full sm:w-auto px-space-xl py-3 rounded-lg bg-primary-container text-on-primary font-headline-md text-headline-md tracking-tight hover:bg-primary shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2" id="submit-article-btn" type="button">
+<span class="material-symbols-outlined text-[22px]">auto_awesome</span>
+<span>Submit Article &amp; Code Together</span>
+</button>
+</div>
+</section>
+<!-- Success Confetti Celebration Modal Overlay (Toggled via JS) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-inverse-surface/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300" id="confetti-modal">
+<!-- Particle elements inside dialog -->
+<div class="relative w-full max-w-lg rounded-2xl bg-surface-container-lowest shadow-2xl p-space-xl flex flex-col items-center text-center transform scale-95 transition-transform duration-300" id="confetti-card">
+<!-- Animated Icon Ring -->
+<div class="relative mb-space-md">
+<div class="w-20 h-20 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-md animate-bounce">
+<span class="material-symbols-outlined text-[44px]">check</span>
+</div>
+<!-- Decorative Burst Dots -->
+<span class="absolute -top-2 -right-2 text-2xl">✨</span>
+<span class="absolute -bottom-1 -left-3 text-2xl">🔥</span>
+<span class="absolute top-1/2 -right-6 text-xl">🚀</span>
+</div>
+<span class="font-label-sm text-label-sm font-bold uppercase tracking-wider text-secondary px-3 py-1 rounded-full bg-secondary-container mb-2">
+          Day 47 Verified &amp; Complete
+        </span>
+<h3 class="font-headline-xl text-headline-xl text-on-surface font-bold tracking-tight">
+          Streak Extended: 13 Days!
+        </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-sm">
+          Awesome work, Maya! Your Redis &amp; Celery implementation passed all cohort automated assertions.
+        </p>
+<!-- Reward Breakdown Bento -->
+<div class="w-full grid grid-cols-2 gap-space-sm my-space-lg text-left">
+<div class="p-space-sm rounded-xl bg-surface-container-low flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Earned Today</span>
+<span class="font-label-md text-label-md font-bold text-primary mt-1">+75 Total XP</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Task + Deep Dive Bonus</span>
+</div>
+<div class="p-space-sm rounded-xl bg-surface-container-low flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Leaderboard Shift</span>
+<span class="font-label-md text-label-md font-bold text-secondary mt-1">Rank #4 ↑ (+2)</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Ahead of 88% cohort</span>
+</div>
+</div>
+<div class="w-full flex flex-col sm:flex-row gap-space-sm">
+<button class="flex-1 py-2.5 rounded-lg bg-surface-container text-on-surface font-body-md text-body-md font-medium hover:bg-surface-container-high transition-colors" id="modal-close-btn" type="button">
+            Keep Coding
+          </button>
+<a class="flex-1 py-2.5 rounded-lg bg-primary-container text-on-primary font-body-md text-body-md font-semibold hover:bg-primary transition-colors flex items-center justify-center gap-1.5 shadow-sm" href="#">
+<span>View Cohort Feed</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Tab Switching Behavior
+  const tabCodeBtn = document.getElementById('tab-code-btn');
+  const tabArticleBtn = document.getElementById('tab-article-btn');
+  const panelCode = document.getElementById('panel-code');
+  const panelArticle = document.getElementById('panel-article');
+
+  function setTab(codeActive) {
+    if (codeActive) {
+      panelCode.classList.remove('hidden');
+      panelArticle.classList.add('hidden');
+      tabCodeBtn.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+      tabCodeBtn.classList.remove('text-on-surface-variant');
+      tabArticleBtn.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+      tabArticleBtn.classList.add('text-on-surface-variant');
+      tabCodeBtn.setAttribute('aria-selected', 'true');
+      tabArticleBtn.setAttribute('aria-selected', 'false');
+    } else {
+      panelCode.classList.add('hidden');
+      panelArticle.classList.remove('hidden');
+      tabArticleBtn.classList.add('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+      tabArticleBtn.classList.remove('text-on-surface-variant');
+      tabCodeBtn.classList.remove('bg-surface-container-lowest', 'text-primary', 'shadow-sm');
+      tabCodeBtn.classList.add('text-on-surface-variant');
+      tabCodeBtn.setAttribute('aria-selected', 'false');
+      tabArticleBtn.setAttribute('aria-selected', 'true');
+    }
+  }
+
+  tabCodeBtn.addEventListener('click', () => setTab(true));
+  tabArticleBtn.addEventListener('click', () => setTab(false));
+
+  // Confetti Modal Interaction
+  const submitTaskBtn = document.getElementById('submit-task-btn');
+  const submitArticleBtn = document.getElementById('submit-article-btn');
+  const modal = document.getElementById('confetti-modal');
+  const modalCloseBtn = document.getElementById('modal-close-btn');
+  const confettiCard = document.getElementById('confetti-card');
+
+  function triggerSubmissionCelebration() {
+    modal.classList.remove('opacity-0', 'pointer-events-none');
+    modal.classList.add('opacity-100');
+    confettiCard.classList.remove('scale-95');
+    confettiCard.classList.add('scale-100');
+  }
+
+  function closeModal() {
+    modal.classList.add('opacity-0', 'pointer-events-none');
+    modal.classList.remove('opacity-100');
+    confettiCard.classList.add('scale-95');
+    confettiCard.classList.remove('scale-100');
+  }
+
+  submitTaskBtn.addEventListener('click', triggerSubmissionCelebration);
+  if (submitArticleBtn) {
+    submitArticleBtn.addEventListener('click', triggerSubmissionCelebration);
+  }
+  modalCloseBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // Simple countdown ticker simulation
+  let secondsLeft = 6 * 3600 + 42 * 60 + 15;
+  const countdownEl = document.getElementById('countdown');
+  setInterval(() => {
+    if (secondsLeft > 0) {
+      secondsLeft--;
+      const h = String(Math.floor(secondsLeft / 3600)).padStart(2, '0');
+      const m = String(Math.floor((secondsLeft % 3600) / 60)).padStart(2, '0');
+      const s = String(secondsLeft % 60).padStart(2, '0');
+      countdownEl.textContent = `Due in ${h}:${m}:${s}`;
+    }
+  }, 1000);
+</script></main><footer class="w-full bg-surface-container-low"><div class="max-w-[1440px] mx-auto px-margin py-space-lg flex flex-col md:flex-row items-center justify-between gap-space-md text-on-surface-variant font-body-sm text-body-sm"><div class="flex items-center gap-space-sm"><span class="font-medium text-on-surface">ClassTrack</span><span>© 2024 ClassTrack Systems Inc. All rights reserved.</span></div><div class="flex items-center gap-space-lg"><a class="hover:text-on-surface transition-colors" data-path="cohort-guidelines" href="#">Cohort Guidelines</a><a class="hover:text-on-surface transition-colors" data-path="api-docs" href="#">API Docs</a><a class="hover:text-on-surface transition-colors" data-path="support-desk" href="#">Support Desk</a></div></div></footer></body></html>

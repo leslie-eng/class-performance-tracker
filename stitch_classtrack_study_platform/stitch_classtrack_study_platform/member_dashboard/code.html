@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-primary-fixed-variant":"#003ea8","on-primary":"#ffffff","on-tertiary":"#ffffff","surface-container-highest":"#dae2fd","on-surface-variant":"#434655","tertiary":"#784b00","background":"#faf8ff","inverse-on-surface":"#eef0ff","on-secondary-fixed":"#002109","on-background":"#131b2e","secondary-fixed":"#6bff8f","primary-fixed-dim":"#b4c5ff","on-secondary-container":"#007432","on-primary-container":"#eeefff","on-error":"#ffffff","on-secondary-fixed-variant":"#005321","secondary-container":"#6bff8f","surface":"#faf8ff","outline-variant":"#c3c6d7","inverse-primary":"#b4c5ff","on-tertiary-container":"#ffeedd","surface-container-lowest":"#ffffff","surface-variant":"#dae2fd","on-tertiary-fixed-variant":"#653e00","surface-tint":"#0053db","error-container":"#ffdad6","tertiary-container":"#996100","outline":"#737686","secondary":"#006e2f","tertiary-fixed-dim":"#ffb95f","secondary-fixed-dim":"#4ae176","on-secondary":"#ffffff","surface-container-high":"#e2e7ff","surface-dim":"#d2d9f4","surface-container":"#eaedff","primary":"#004ac6","inverse-surface":"#283044","primary-fixed":"#dbe1ff","error":"#ba1a1a","tertiary-fixed":"#ffddb8","on-error-container":"#93000a","on-primary-fixed":"#00174b","primary-container":"#2563eb","surface-container-low":"#f2f3ff","on-surface":"#131b2e","on-tertiary-fixed":"#2a1700","surface-bright":"#faf8ff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-sm":"0.5rem","gutter":"1.5rem","margin-sm":"1rem","margin":"2rem","space-lg":"1.5rem","space-xl":"2rem","gutter-sm":"1rem","space-md":"1rem","space-xs":"0.25rem"},"fontFamily":{"label-sm":["JetBrains Mono"],"headline-lg":["Inter"],"body-lg":["Inter"],"headline-md":["Inter"],"body-sm":["Inter"],"headline-xl-mobile":["Inter"],"body-md":["Inter"],"label-md":["JetBrains Mono"],"headline-xl":["Inter"]},"fontSize":{"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.02em","fontWeight":"500"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","letterSpacing":"-0.011em","fontWeight":"400"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-sm":["12px",{"lineHeight":"16px","letterSpacing":"0em","fontWeight":"400"}],"headline-xl-mobile":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","letterSpacing":"-0.006em","fontWeight":"400"}],"label-md":["13px",{"lineHeight":"18px","letterSpacing":"-0.01em","fontWeight":"500"}],"headline-xl":["36px",{"lineHeight":"44px","letterSpacing":"-0.025em","fontWeight":"700"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-[1440px] mx-auto px-margin flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md shrink-0"><a class="flex items-center gap-space-xs" data-path="dashboard" href="#"><img alt="ClassTrack Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VNA7yvZgQ00UctVR4conNr4uLw3uxlWsMnVx2jh-AR8vceZ-_uKxqTz4_qXdrGYWJOWKA9NM9SWDmVeWD_RtgNa3svB4OrF3v8J92Uyd7nYH5MZ01oIpzaAa6dIjTJjd_95KVZ7YzsFy1Pt5RPKpETpXRwp8Xm-cUieQKK0POPByJyk_7I7HLMKV9YSxfiISf1i5GU2zeNPUjr9CcxQ9sa6zh7qj7TJWmGTDiJvlp6Ehjm5HBZK1_ob8UJ"/><span class="font-headline-md text-headline-md tracking-tight text-on-surface hidden sm:inline-block">ClassTrack</span></a><div class="h-5 w-px bg-surface-container-high hidden md:block"></div><button class="hidden lg:flex items-center gap-space-xs px-space-sm py-1 rounded-full bg-surface-container-low hover:bg-surface-container-high transition-colors" type="button"><span class="w-2 h-2 rounded-full bg-secondary shrink-0"></span><span class="font-label-sm text-label-sm text-on-surface truncate max-w-[210px]">🐍 100 Days of Python v2.4 (Cohort 8)</span><span class="material-symbols-outlined text-[18px] text-on-surface-variant">expand_more</span></button></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-primary-container text-on-primary font-headline-md"><a aria-current="page" class="px-space-sm py-1.5 rounded-lg transition-colors bg-primary-container text-on-primary font-headline-md" data-path="dashboard" href="#">Dashboard</a><a class="px-space-sm py-1.5 rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="submit-task" href="#">Submit Task</a><a class="px-space-sm py-1.5 rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="leaderboard" href="#">Leaderboard</a><a class="px-space-sm py-1.5 rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="ai-grading" href="#">AI Grading</a><a class="px-space-sm py-1.5 rounded-lg text-body-md font-body-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" data-path="job-tracker" href="#">Job Tracker</a></nav><div class="flex items-center gap-space-sm shrink-0"><button class="hidden sm:flex items-center gap-space-xs px-space-sm py-1.5 rounded-lg bg-surface-container-lowest shadow-[0_1px_2px_rgba(0,0,0,0.04)] text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">search</span><span class="font-body-sm text-body-sm hidden md:inline">Search tasks, peers...</span><kbd class="font-label-sm text-label-sm px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant">⌘K</kbd></button><div class="flex items-center gap-1 px-space-sm py-1 rounded-full bg-tertiary-fixed text-tertiary-container shadow-[0_1px_2px_rgba(0,0,0,0.04)]"><span class="text-[14px]">🔥</span><span class="font-label-md text-label-md font-bold">12 Days</span></div><button class="relative p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1 right-1 w-4 h-4 rounded-full bg-error text-on-error font-label-sm text-[10px] flex items-center justify-center leading-none">3</span></button><div class="h-6 w-px bg-surface-container-high"></div><div class="flex items-center gap-space-xs"><div class="relative"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbboR3dQGo22Tcss2Rx2RoJboaeKqE-ImjYCJv_-E-8VKHG_-LCnskgArDyFnQVzXglLdzL-dubqJc1GbvFVDSOMsUzuHOjxuILacfWyNqwGVE9gTmBZyjt_51DzC4WNC4F_R-B-ET_msfDFj3EwxLd36IvSpiS5rqAAWsmpWJQaI18AB-Oix1Q3GPP2Cm7hEp78XHWUj70wjvrbphFoPMeO590XSQWkz4wTMWWYk8w8ecq8tEyL4cXw"/><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-secondary ring-2 ring-surface"></span></div><span class="font-body-md text-body-md text-on-surface hidden lg:inline font-medium">Maya Patel</span></div></div></div></header><main class="w-full pt-16 bg-surface min-h-[calc(100vh-80px)]"><div class="flex flex-col w-full">
+<div class="max-w-[1440px] w-full mx-auto px-margin py-space-lg flex flex-col gap-space-lg">
+<!-- Top Greetings & Primary Actions Bar -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-sm">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-semibold tracking-wide uppercase">Cohort 8 • Active Track</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Day 47 in session</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Good morning, Maya! You're on track for today's milestone.</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Keep your momentum rolling. Submit Day 47 before midnight UTC to secure the streak freeze shield.</p>
+</div>
+<div class="flex items-center gap-space-sm shrink-0">
+<button class="px-space-md h-[38px] rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-body-md text-body-md font-medium transition-colors flex items-center gap-1.5 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">menu_book</span>
+<span>View Cohort Rules</span>
+</button>
+<button class="px-space-md h-[38px] rounded-lg bg-primary-container text-on-primary hover:bg-primary font-body-md text-body-md font-medium transition-all shadow-sm flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[18px]">add_task</span>
+<span>Submit Today's Task</span>
+</button>
+</div>
+</div>
+<!-- Stats Cards Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Streak Card -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<span class="font-body-sm text-body-sm font-medium text-on-surface-variant">Current Streak</span>
+<div class="w-8 h-8 rounded-full bg-tertiary-fixed flex items-center justify-center text-tertiary-container shadow-sm">
+<span class="text-[16px]">🔥</span>
+</div>
+</div>
+<div class="my-space-sm">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold">12</span>
+<span class="font-label-md text-label-md text-on-surface-variant font-medium">Days</span>
+</div>
+<div class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm">
+<span class="text-[11px]">✨</span> Top 5% of Cohort 8
+          </div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span>+1 day away from Bronze Flame milestone</span>
+</p>
+</div>
+<!-- Longest Streak -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<span class="font-body-sm text-body-sm font-medium text-on-surface-variant">Longest Streak</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined text-[18px]">emoji_events</span>
+</div>
+</div>
+<div class="my-space-sm">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold">28</span>
+<span class="font-label-md text-label-md text-on-surface-variant font-medium">Days</span>
+</div>
+<div class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm">
+            Personal Record
+          </div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">
+          Achieved during Python Fundamentals phase
+        </p>
+</div>
+<!-- Total Points -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<span class="font-body-sm text-body-sm font-medium text-on-surface-variant">Cohort Points</span>
+<div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed-variant shadow-sm">
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+</div>
+</div>
+<div class="my-space-sm">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold">1,380</span>
+<span class="font-label-md text-label-md text-secondary font-medium">+95 this wk</span>
+</div>
+<!-- Progress bar -->
+<div class="w-full bg-surface-container-high h-2 rounded-full mt-2.5 overflow-hidden">
+<div class="bg-primary h-full rounded-full transition-all duration-500" style="width: 74%"></div>
+</div>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>Level 3 Dev</span>
+<span class="text-primary font-medium">74% to Lvl 4</span>
+</div>
+</div>
+<!-- Cohort Rank -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-start justify-between">
+<span class="font-body-sm text-body-sm font-medium text-on-surface-variant">Cohort Standing</span>
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant shadow-sm">
+<span class="material-symbols-outlined text-[18px]">leaderboard</span>
+</div>
+</div>
+<div class="my-space-sm">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-headline-xl text-headline-xl text-on-surface font-bold">#5</span>
+<span class="font-label-md text-label-md text-on-surface-variant font-medium">/ 48 peers</span>
+</div>
+<div class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[13px]">trending_up</span> +2 positions up
+          </div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Passing threshold: 1,120 pts
+        </p>
+</div>
+</div>
+<!-- Main Two-Column Hub Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- Left / Center Column (8 cols ~65%) -->
+<div class="lg:col-span-8 flex flex-col gap-space-lg">
+<!-- Activity Log Heatmap Card -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary">grid_view</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Activity Log — 100 Days of Python</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Tracking daily code push, quiz pass, and markdown submission cadence.</p>
+</div>
+<div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-lg shrink-0">
+<button class="px-2.5 py-1 rounded text-label-sm font-label-sm bg-surface-container-lowest text-on-surface font-semibold shadow-sm transition-all" type="button">Current (100d)</button>
+<button class="px-2.5 py-1 rounded text-label-sm font-label-sm text-on-surface-variant hover:text-on-surface transition-colors" type="button">All Time</button>
+</div>
+</div>
+<!-- Contribution Matrix Visual -->
+<div class="overflow-x-auto pb-1">
+<div class="min-w-[620px] flex flex-col gap-2">
+<!-- Month labels -->
+<div class="flex font-label-sm text-label-sm text-on-surface-variant pl-8 justify-between pr-2">
+<span>Jan</span>
+<span>Feb</span>
+<span>Mar</span>
+<span>Apr</span>
+</div>
+<div class="flex gap-2">
+<!-- Day of week tags -->
+<div class="flex flex-col justify-between font-label-sm text-label-sm text-on-surface-variant py-0.5 select-none w-6">
+<span class="h-2.5 leading-none">Mon</span>
+<span class="h-2.5 leading-none">Wed</span>
+<span class="h-2.5 leading-none">Fri</span>
+</div>
+<!-- Days Heatmap Matrix (7 rows x ~22 columns) -->
+<div class="grid grid-rows-7 grid-flow-col gap-1.5 flex-1" id="heatmap-grid">
+<!-- Generating calibrated cells representing 46 completed days with intensity -->
+<!-- Col 1 -->
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary-fixed-dim" title="Jan 2: 2 tasks solved"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary" title="Jan 3: 4 tasks solved"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary" title="Jan 4: 3 tasks solved"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary-fixed-dim" title="Jan 5: 1 task solved"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary-fixed-dim"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<!-- Col 2 -->
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary-fixed-dim"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary-fixed-dim"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<!-- Col 3 -->
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary-fixed-dim"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary-fixed-dim"></div>
+<!-- Col 4 -->
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary-fixed-dim"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary-fixed-dim"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<!-- Col 5 -->
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary-fixed-dim"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary-fixed-dim"></div>
+<!-- Col 6 -->
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary-fixed-dim"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary-fixed-dim"></div>
+<!-- Col 7 (Current streak active block) -->
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-secondary-fixed shadow-sm ring-1 ring-secondary"></div>
+<!-- Remaining Unfilled Days -->
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+<div class="w-3.5 h-3.5 rounded-sm bg-surface-container-high opacity-40"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Legend & Progress Summary -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pt-space-xs font-body-sm text-body-sm text-on-surface-variant">
+<div class="flex items-center gap-space-xs">
+<span class="font-medium text-on-surface">46 of 100 days completed</span>
+<span class="px-2 py-0.5 rounded bg-surface-container font-label-sm text-label-sm text-primary font-bold">46%</span>
+</div>
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm">
+<span>Less</span>
+<span class="w-2.5 h-2.5 rounded-sm bg-surface-container-high"></span>
+<span class="w-2.5 h-2.5 rounded-sm bg-surface-container-highest"></span>
+<span class="w-2.5 h-2.5 rounded-sm bg-secondary-fixed-dim"></span>
+<span class="w-2.5 h-2.5 rounded-sm bg-secondary"></span>
+<span>More</span>
+</div>
+</div>
+</div>
+<!-- Recent Submissions Timeline -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary">history_edu</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Recent Submissions Timeline</h2>
+</div>
+<a class="font-label-sm text-label-sm text-primary hover:underline flex items-center gap-0.5" href="#">
+<span>All 46 submissions</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+<div class="flex flex-col gap-space-md">
+<!-- Day 46 item -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between p-space-md rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors gap-space-sm">
+<div class="flex items-start gap-space-md min-w-0">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed flex flex-col items-center justify-center shrink-0">
+<span class="font-label-sm text-label-sm text-on-primary-fixed font-bold leading-none">D46</span>
+<span class="material-symbols-outlined text-[14px] text-on-primary-fixed mt-0.5">code</span>
+</div>
+<div class="min-w-0 flex flex-col">
+<span class="font-body-md text-body-md font-semibold text-on-surface truncate">Asynchronous Web Scraping with Playwright &amp; BeautifulSoup</span>
+<div class="flex flex-wrap items-center gap-2 mt-1 font-body-sm text-body-sm text-on-surface-variant">
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-on-surface font-label-sm text-label-sm">Code Task</span>
+<span>•</span>
+<span>Submitted yesterday at 21:14</span>
+<span>•</span>
+<span class="text-secondary font-medium">Verified ✓ +25 pts</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+<span class="font-label-sm text-label-sm px-2 py-1 rounded bg-surface-container-highest text-on-surface font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">auto_awesome</span>
+                  Clean error handling
+                </span>
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" title="View Code" type="button">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+</button>
+</div>
+</div>
+<!-- Day 45 item -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between p-space-md rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors gap-space-sm">
+<div class="flex items-start gap-space-md min-w-0">
+<div class="w-10 h-10 rounded-lg bg-tertiary-fixed flex flex-col items-center justify-center shrink-0">
+<span class="font-label-sm text-label-sm text-on-tertiary-fixed font-bold leading-none">D45</span>
+<span class="material-symbols-outlined text-[14px] text-on-tertiary-fixed mt-0.5">article</span>
+</div>
+<div class="min-w-0 flex flex-col">
+<span class="font-body-md text-body-md font-semibold text-on-surface truncate">Building FastAPIs with Pydantic V2 &amp; JWT Auth</span>
+<div class="flex flex-wrap items-center gap-2 mt-1 font-body-sm text-body-sm text-on-surface-variant">
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-on-surface font-label-sm text-label-sm">Technical Article</span>
+<span>•</span>
+<span>2 days ago</span>
+<span>•</span>
+<span class="text-secondary font-medium">Graded (8.9/10) ✓ +35 pts</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+<span class="font-label-sm text-label-sm px-2 py-1 rounded bg-secondary-container text-on-secondary-container font-semibold">
+                  Top 10% Article
+                </span>
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Read Article" type="button">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span>
+</button>
+</div>
+</div>
+<!-- Day 44 item -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between p-space-md rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors gap-space-sm">
+<div class="flex items-start gap-space-md min-w-0">
+<div class="w-10 h-10 rounded-lg bg-primary-fixed flex flex-col items-center justify-center shrink-0">
+<span class="font-label-sm text-label-sm text-on-primary-fixed font-bold leading-none">D44</span>
+<span class="material-symbols-outlined text-[14px] text-on-primary-fixed mt-0.5">code</span>
+</div>
+<div class="min-w-0 flex flex-col">
+<span class="font-body-md text-body-md font-semibold text-on-surface truncate">Binary Search Tree Traversal Algorithms</span>
+<div class="flex flex-wrap items-center gap-2 mt-1 font-body-sm text-body-sm text-on-surface-variant">
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-on-surface font-label-sm text-label-sm">Algorithm</span>
+<span>•</span>
+<span>3 days ago</span>
+<span>•</span>
+<span class="text-secondary font-medium">Verified ✓ +25 pts</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-2 shrink-0 self-end sm:self-center">
+<span class="font-label-sm text-label-sm px-2 py-1 rounded bg-surface-container text-on-surface-variant font-medium">
+                  3 Test suites passed
+                </span>
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" title="View Code" type="button">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- AI Feedback Highlight Card -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-space-lg">
+<div class="flex items-start gap-space-md">
+<!-- Score Circular Radial Indicator -->
+<div class="relative w-16 h-16 shrink-0 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-secondary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="89, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<div class="absolute flex flex-col items-center justify-center">
+<span class="font-label-md text-label-md font-bold text-on-surface leading-none">8.9</span>
+<span class="text-[9px] font-label-sm text-on-surface-variant leading-none mt-0.5">/ 10</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">psychology</span>
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wide">AI Grader Insights</span>
+<span class="text-on-surface-variant text-[11px]">• Day 45 Article Critique</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface">“Mastering Database Connection Pools in SQLAlchemy 2.0”</h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
+                “Great depth in connection lifecycle analysis. To reach 9.5+, expand on handling pool exhaustion under heavy microservice concurrent loads.”
+              </p>
+</div>
+</div>
+<div class="shrink-0 self-stretch md:self-auto flex items-end md:items-center">
+<button class="w-full md:w-auto px-space-md py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-body-md text-body-md font-medium transition-colors flex items-center justify-center gap-1.5 shadow-sm" type="button">
+<span>View full critique</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Right Sidebar Column (4 cols ~35%) -->
+<div class="lg:col-span-4 flex flex-col gap-space-lg">
+<!-- Today's Pending Daily Task Reminder (Highlighted) -->
+<div class="bg-primary-container text-on-primary p-space-lg rounded-xl shadow-md flex flex-col gap-space-md relative overflow-hidden">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/10 text-on-primary font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed animate-pulse"></span>
+<span>Due in 6h 42m</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary-fixed opacity-90">Cohort Target</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm tracking-wider uppercase text-primary-fixed-dim">Today's Challenge • Day 47</span>
+<h3 class="font-headline-md text-headline-md font-bold mt-1 text-on-primary">Redis Caching &amp; Celery Task Queues</h3>
+<p class="font-body-sm text-body-sm text-on-primary-container mt-1.5 opacity-90">Implement async worker decorators and monitor task starvation rates.</p>
+</div>
+<div class="flex items-center gap-3 pt-space-xs">
+<button class="w-full py-2.5 px-space-md rounded-lg bg-on-primary text-primary hover:bg-surface font-body-md text-body-md font-semibold transition-all shadow flex items-center justify-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+<span>Start Task Now</span>
+</button>
+</div>
+</div>
+<!-- Weekly Goal Progress Card -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant font-medium">Weekly Target</span>
+<span class="font-headline-md text-headline-md text-on-surface">6 / 7 Days Done</span>
+</div>
+<div class="px-2 py-1 rounded bg-secondary-container text-on-secondary-container font-label-md text-label-md font-bold">
+              85%
+            </div>
+</div>
+<!-- Weekly Days Check Matrix -->
+<div class="grid grid-cols-7 gap-1.5 text-center">
+<div class="flex flex-col items-center gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">M</span>
+<div class="w-8 h-8 rounded-lg bg-secondary text-on-secondary flex items-center justify-center shadow-xs">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">T</span>
+<div class="w-8 h-8 rounded-lg bg-secondary text-on-secondary flex items-center justify-center shadow-xs">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">W</span>
+<div class="w-8 h-8 rounded-lg bg-secondary text-on-secondary flex items-center justify-center shadow-xs">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">T</span>
+<div class="w-8 h-8 rounded-lg bg-secondary text-on-secondary flex items-center justify-center shadow-xs">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">F</span>
+<div class="w-8 h-8 rounded-lg bg-secondary text-on-secondary flex items-center justify-center shadow-xs">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">S</span>
+<div class="w-8 h-8 rounded-lg bg-secondary text-on-secondary flex items-center justify-center shadow-xs">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="font-label-sm text-label-sm font-semibold text-primary">S</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container-high text-primary flex items-center justify-center shadow-xs">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+</div>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Complete today to claim the <strong>Perfect Week multiplier (+50 XP)</strong>.
+          </p>
+</div>
+<!-- Next Milestone Card -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-tertiary-fixed text-tertiary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]">military_tech</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant">Upcoming Milestone</span>
+<h4 class="font-headline-md text-headline-md text-on-surface">Halfway Pioneer</h4>
+</div>
+</div>
+<div class="flex items-center justify-between font-body-sm text-body-sm pt-2">
+<span class="text-on-surface font-medium">Day 50 Milestone</span>
+<span class="text-primary font-semibold font-label-sm text-label-sm">3 Days left</span>
+</div>
+<!-- Progress linear -->
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full rounded-full transition-all duration-300" style="width: 92%"></div>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low text-on-surface-variant font-body-sm text-body-sm mt-1 flex items-center gap-2">
+<span class="text-tertiary text-[16px]">🎁</span>
+<span>Reward: <strong>+100 bonus pts</strong> &amp; permanent Halfway Discord flair.</span>
+</div>
+</div>
+<!-- Motivation & Mindset Card (Notion-style Quote) -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-sm relative">
+<span class="text-[32px] leading-none text-outline-variant font-serif select-none -mb-3">“</span>
+<p class="font-body-md text-body-md text-on-surface italic pl-1 leading-relaxed">
+            Consistency isn't about perfection; it's about refusing to quit when it gets tedious.
+          </p>
+<div class="flex items-center justify-between pt-space-xs pl-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">— Guido van Rossum</span>
+<span class="material-symbols-outlined text-[16px] text-outline-variant">format_quote</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Micro-interaction for Heatmap hover tooltip highlights
+  document.querySelectorAll('#heatmap-grid > div').forEach(cell => {
+    cell.addEventListener('mouseenter', () => {
+      cell.classList.add('scale-125', 'z-10');
+      cell.style.transition = 'transform 0.15s ease-out';
+    });
+    cell.addEventListener('mouseleave', () => {
+      cell.classList.remove('scale-125', 'z-10');
+    });
+  });
+</script></main><footer class="w-full bg-surface-container-low"><div class="max-w-[1440px] mx-auto px-margin py-space-lg flex flex-col md:flex-row items-center justify-between gap-space-md text-on-surface-variant font-body-sm text-body-sm"><div class="flex items-center gap-space-sm"><span class="font-medium text-on-surface">ClassTrack</span><span>© 2024 ClassTrack Systems Inc. All rights reserved.</span></div><div class="flex items-center gap-space-lg"><a class="hover:text-on-surface transition-colors" data-path="cohort-guidelines" href="#">Cohort Guidelines</a><a class="hover:text-on-surface transition-colors" data-path="api-docs" href="#">API Docs</a><a class="hover:text-on-surface transition-colors" data-path="support-desk" href="#">Support Desk</a></div></div></footer></body></html>
