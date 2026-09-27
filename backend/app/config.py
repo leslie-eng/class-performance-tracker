@@ -1,6 +1,7 @@
 from functools import lru_cache
 from zoneinfo import ZoneInfo
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -39,6 +40,16 @@ class Settings(BaseSettings):
     weekly_digest_day: str = "sun"
 
     cors_origins: str = "http://localhost:3000,http://localhost:5173"
+
+    @field_validator("database_url")
+    @classmethod
+    def use_psycopg3(cls, url: str) -> str:
+        # Hosts like Render/Railway/Neon hand out postgres:// or postgresql:// URLs,
+        # which SQLAlchemy maps to psycopg2; we ship psycopg (v3).
+        for prefix in ("postgres://", "postgresql://"):
+            if url.startswith(prefix):
+                return "postgresql+psycopg://" + url[len(prefix):]
+        return url
 
     @property
     def tz(self) -> ZoneInfo:

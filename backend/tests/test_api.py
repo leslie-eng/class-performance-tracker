@@ -254,3 +254,13 @@ def test_grading_without_api_key_fails_cleanly(client, challenge, monkeypatch):
     sub = client.get(f"/submissions/{sub['id']}", headers=h).json()
     assert sub["grading_status"] == "failed"
     assert "isn't configured" in sub["ai_feedback"]
+
+
+@pytest.mark.parametrize(
+    "url",
+    ["postgres://u:p@h:5432/db", "postgresql://u:p@h:5432/db", "postgresql+psycopg://u:p@h:5432/db"],
+)
+def test_database_url_uses_psycopg3(url):
+    from app.config import Settings
+
+    assert Settings(database_url=url).database_url == "postgresql+psycopg://u:p@h:5432/db"
