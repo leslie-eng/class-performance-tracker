@@ -1,5 +1,20 @@
-const BASE = import.meta.env.VITE_API_URL ?? '/api'
+/** VITE_API_URL without a trailing slash; '/api' (the Vite dev proxy) when unset or blank. */
+function apiBase(raw: string | undefined): string {
+  const url = raw?.trim().replace(/\/+$/, '')
+  if (!url) return '/api'
+  // "classtrack-api.onrender.com" without a scheme would resolve against the frontend's own origin.
+  return /^(https?:)?\/\//.test(url) || url.startsWith('/') ? url : `https://${url}`
+}
+
+const BASE = apiBase(import.meta.env.VITE_API_URL)
 const TOKEN_KEY = 'classtrack.token'
+
+if (import.meta.env.PROD && BASE === '/api') {
+  console.warn(
+    '[api] VITE_API_URL was not set when this build was made, so requests go to /api on the frontend host. ' +
+      'Set VITE_API_URL to the API URL and rebuild.',
+  )
+}
 
 export class ApiError extends Error {
   status: number
@@ -65,20 +80,52 @@ function errorMessage(body: unknown, fallback: string): string {
 export async function api<T>(path: string, init: RequestInit & { json?: unknown } = {}): Promise<T> {
   const { json, headers, ...rest } = init
   const token = getToken()
-  const res = await fetch(`${BASE}${path}`, {
-    ...rest,
-    headers: {
-      ...(json !== undefined ? { 'Content-Type': 'application/json' } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...headers,
-    },
-    body: json !== undefined ? JSON.stringify(json) : rest.body,
-  })
+  const url = `${BASE}${path}`
+  const method = (rest.method ?? 'GET').toUpperCase()
+
+  let res: Response
+  try {
+    res = await fetch(url, {
+      ...rest,
+      headers: {
+        ...(json !== undefined ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...headers,
+      },
+      body: json !== undefined ? JSON.stringify(json) : rest.body,
+    })
+  } catch (err) {
+    // fetch only rejects when no response is readable: offline, DNS failure, or blocked by CORS.
+    console.error(`[api] ${method} ${url} failed before a response (network or CORS)`, err)
+    throw new ApiError(
+      0,
+      `Could not reach the API at ${BASE}. Check your connection, that VITE_API_URL is right, ` +
+        `and that the API's CORS_ORIGINS includes ${window.location.origin}.`,
+    )
+  }
+
   if (res.status === 204) return undefined as T
-  const body = await res.json().catch(() => null)
+  const text = await res.text()
+  let body: unknown = null
+  try {
+    body = text ? JSON.parse(text) : null
+  } catch {
+    // not JSON; handled below
+  }
+
   if (!res.ok) {
+    console.error(`[api] ${method} ${url} -> ${res.status}`, body ?? text.slice(0, 300))
     if (res.status === 401 && token) onUnauthorized()
-    throw new ApiError(res.status, errorMessage(body, `Request failed (${res.status})`))
+    throw new ApiError(res.status, errorMessage(body, res.statusText || 'Request failed'))
+  }
+  if (body === null && text) {
+    // A 2xx HTML page is the frontend's index.html: the request never reached the API.
+    console.error(`[api] ${method} ${url} -> ${res.status} but the response is not JSON`, text.slice(0, 300))
+    throw new ApiError(
+      res.status,
+      `The API URL returned a web page instead of JSON, so the request never reached the API. ` +
+        `VITE_API_URL is probably unset or points at the frontend (current: ${BASE}). Set it and rebuild.`,
+    )
   }
   return body as T
 }

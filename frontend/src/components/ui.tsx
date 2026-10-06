@@ -1,3 +1,4 @@
+import { ApiError } from '../lib/api'
 import { initials } from '../lib/format'
 import type { ReactNode } from 'react'
 
@@ -124,7 +125,9 @@ export function PageLoader() {
 
 export function ErrorBanner({ error }: { error: unknown }) {
   if (!error) return null
-  const msg = error instanceof Error ? error.message : String(error)
+  const text = error instanceof Error ? error.message : String(error)
+  // status 0 means no response at all (network/CORS), so there's no code to show
+  const msg = error instanceof ApiError && error.status ? `Error ${error.status}: ${text}` : text
   return (
     <div role="alert" className="flex items-start gap-2 rounded-lg bg-error-container px-3 py-2 text-body-md text-on-error-container">
       <Icon name="error" className="text-[18px]" />

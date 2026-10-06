@@ -81,7 +81,7 @@ Templates with placeholders:
 | `DATABASE_URL` | **Yes** | Postgres connection string. `postgres://` and `postgresql://` are converted to SQLAlchemy's psycopg 3 driver automatically | `postgresql://USER:PASSWORD@HOST:5432/DB` | Render Postgres: the Blueprint wires it in (or use the database page > **Internal Database URL**). Neon: Dashboard > Connection Details |
 | `JWT_SECRET` | **Yes** | Signs login tokens. Defaults to the insecure `change-me` if unset | 48+ random characters | `python -c "import secrets; print(secrets.token_urlsafe(48))"`. The Blueprint generates one |
 | `ADMIN_EMAILS` | **Yes** (for an admin) | Accounts registered with these emails become admins | `you@example.com,ta@example.com` | You choose |
-| `CORS_ORIGINS` | **Yes** (in production) | Comma-separated browser origins allowed to call the API. Defaults to `http://localhost:3000,http://localhost:5173` | `https://classtrack-web.onrender.com` | Your static site's URL: scheme included, no trailing slash |
+| `CORS_ORIGINS` | **Yes** (in production) | Comma-separated browser origins allowed to call the API. Defaults to `http://localhost:3000,http://localhost:5173`. Read at startup, so the API must redeploy after a change. The API logs the list it's using as `CORS allowed origins: [...]` | `https://classtrack-web.onrender.com,http://localhost:5173` | Your static site's URL, scheme included. Keep the localhost entries if you also run the frontend locally against this API |
 | `PYTHON_VERSION` | Render only | Python version Render installs | `3.13` | — |
 | `FORWARDED_ALLOW_IPS` | Render only | Makes uvicorn trust Render's proxy headers, so the app sees the real client IP and `https` | `*` | — |
 | `TIMEZONE` | No (default `UTC`) | Defines "today", day numbers and the nightly job time | `Africa/Lagos` | An [IANA tz name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) |
@@ -99,7 +99,9 @@ Templates with placeholders:
 
 ### Frontend (`classtrack-web`)
 
-Vite reads these at **build time**. After changing one, you must rebuild the site; a restart is not enough.
+Vite copies `VITE_*` values into the JavaScript bundle at **build time**. Changing one in Render's
+**Environment** tab does nothing until the static site is **rebuilt**: use **Manual Deploy > Clear build cache &
+deploy**. Until then, the live site keeps the old value, or no value at all.
 
 | Variable | Required? | Purpose | Example format | Where to get it |
 |---|---|---|---|---|
@@ -202,11 +204,24 @@ The start command runs migrations on every deploy, so you don't need a separate 
 | `connection refused` / `could not translate host name` / `localhost` in the logs | `DATABASE_URL` is missing or wrong. `localhost` doesn't exist on Render | Paste the full connection string. For Render Postgres in the same region, use the **Internal** URL. Other providers usually need `?sslmode=require` |
 | `prepared statement "_pg3_x" does not exist` | A transaction-mode pooler (PgBouncer) | Use the direct, non-pooler host, for example the Neon host without `-pooler` |
 | Browser console: blocked by CORS policy | `CORS_ORIGINS` doesn't exactly match the site's origin | Set it to `https://<web>.onrender.com`: scheme included, no trailing slash. Separate several origins with commas, then let the API redeploy |
-| The frontend calls `/api/...` and gets 404, or calls `localhost:8000` | `VITE_API_URL` wasn't set when the site was built | Set it, then **Clear build cache & deploy** the static site |
+| Forms "submit" but nothing reaches the API. The error says *"returned a web page instead of JSON"*, or the requests go to `/api/...` and return 404/405 | `VITE_API_URL` wasn't set when the site was built. The requests hit the static site, whose `/* → /index.html` rewrite answers them | Set `VITE_API_URL` to the API URL, then **Clear build cache & deploy** the static site |
+| *"Could not reach the API at …"* | CORS blocked the request, the URL is wrong, or the API crashed. An unhandled 500 also has no CORS headers, so the browser reports it as a CORS error | Check the API logs first. Then make sure `CORS_ORIGINS` contains the site's exact origin, and that opening `<VITE_API_URL>/health` in a browser returns `{"status":"ok"}` |
 | Refreshing `/leaderboard` or `/grading/12` gives 404 | The SPA rewrite is missing | Add a rewrite rule: source `/*`, destination `/index.html` |
 | The first request takes about a minute; nightly nudges don't arrive | Free-tier spin-down | Expected on the free plan. Upgrade the API instance to keep it awake |
 
 ---
+
+### Debugging API requests
+
+All requests go through one client, [`frontend/src/lib/api.ts`](frontend/src/lib/api.ts), which uses
+`VITE_API_URL` as the base URL.
+
+- **On screen:** a failed form shows `Error <status>: <message>` next to the form. A failed page load shows the
+  same message in a toast with a **Retry** button.
+- **In the console:** every failed request is logged as `[api] METHOD URL -> status`, with the response body.
+  If the production build has no `VITE_API_URL`, the console also shows a warning at load.
+- **In DevTools > Network:** check that requests go to `https://<api>.onrender.com/...`, not to the site's own
+  domain.
 
 ## 6. First admin account
 

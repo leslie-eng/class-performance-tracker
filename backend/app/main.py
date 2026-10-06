@@ -23,10 +23,14 @@ async def lifespan(app: FastAPI):
 
 
 settings = get_settings()
+# Browsers send Origin without a trailing slash, so "https://x.onrender.com/" would never match.
+cors_origins = [o.strip().rstrip("/") for o in settings.cors_origins.split(",") if o.strip()]
+logging.getLogger(__name__).info("CORS allowed origins: %s", cors_origins)
+
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[o.strip() for o in settings.cors_origins.split(",") if o.strip()],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
