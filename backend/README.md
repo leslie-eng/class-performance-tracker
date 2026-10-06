@@ -7,9 +7,7 @@ FastAPI backend for ClassTrack, built from `../classmate-tracker-design-doc.pdf`
 ```bash
 python -m venv .venv && .venv/Scripts/activate      # or: source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env                                 # then edit it
-docker run -d --name classtrack-pg -e POSTGRES_USER=classtrack -e POSTGRES_PASSWORD=classtrack \
-  -e POSTGRES_DB=classtrack -p 5432:5432 postgres:16-alpine
+cp .env.example .env                                 # then set DATABASE_URL (local Postgres or Neon)
 alembic upgrade head
 uvicorn app.main:app --reload
 ```

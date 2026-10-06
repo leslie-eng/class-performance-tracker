@@ -8,49 +8,43 @@ members who are falling behind and can send them a WhatsApp nudge, and admins ge
 | Part | Stack | Folder |
 |---|---|---|
 | API | Python 3.13, FastAPI, SQLAlchemy 2, Alembic, APScheduler, uvicorn | [`backend/`](backend/) ([API docs](backend/README.md)) |
-| Web app | React 19, TypeScript, Vite, Tailwind v4, TanStack Query | [`frontend/`](frontend/) ([UI notes](frontend/README.md)) |
-| Database | PostgreSQL 16 (SQLite works only for tests) | external |
+| Web app | React 19, TypeScript, Vite (builds to `dist/`), Tailwind v4, React Router, TanStack Query | [`frontend/`](frontend/) ([UI notes](frontend/README.md)) |
+| Database | PostgreSQL (SQLite works only for tests) | external |
 
-There is **no Dockerfile at the repo root**. Each app has its own, in `backend/Dockerfile` and
-`frontend/Dockerfile`. `docker-compose.yml` runs all three parts locally. [`render.yaml`](render.yaml) deploys them
-to Render.
+The repo is a monorepo with two apps. Neither uses Docker. On Render they run as a **Python web service** and a
+**Static Site**, both defined in [`render.yaml`](render.yaml).
 
 ---
 
 ## 1. Local setup
 
-### Option A: Docker (everything in one command)
+Prerequisites:
+- Python 3.13. The version is pinned in `backend/.python-version`; 3.14 also works locally.
+- Node 22 and npm.
+- A Postgres database: a local install, or a free [Neon](https://neon.tech) database.
 
-Prerequisites: Docker Desktop.
+### Backend (http://localhost:8000, Swagger UI at `/docs`)
 
 ```bash
-cp .env.example .env          # set JWT_SECRET at least
-docker compose up --build
+cd backend
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env               # set DATABASE_URL, JWT_SECRET, ADMIN_EMAILS
+alembic upgrade head               # create/upgrade tables
+uvicorn app.main:app --reload
 ```
 
-- App: http://localhost:8080
-- API and Swagger UI: http://localhost:8000/docs
-
-Compose starts Postgres, runs migrations and serves the frontend through nginx, which proxies `/api` to the backend.
-
-### Option B: Run each part directly
-
-Prerequisites: Python 3.13, Node 22, and a Postgres database (local or Neon).
+### Frontend (http://localhost:5173)
 
 ```bash
-# backend
-cd backend
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env                                 # edit DATABASE_URL, JWT_SECRET, ADMIN_EMAILS
-alembic upgrade head                                 # create/upgrade tables
-uvicorn app.main:app --reload                        # http://localhost:8000
-
-# frontend (second terminal)
 cd frontend
 npm install
-npm run dev                                          # http://localhost:5173, proxies /api to :8000
+npm run dev
 ```
+
+In development, leave `VITE_API_URL` unset. Vite forwards `/api/*` to `http://localhost:8000`, so you don't need
+any CORS setup.
 
 Tests: `cd backend && pip install -r requirements-dev.txt && pytest`. By default the tests use SQLite.
 
@@ -60,34 +54,36 @@ Tests: `cd backend && pip install -r requirements-dev.txt && pytest`. By default
 
 | Component | Required? | Used for | Where to get it |
 |---|---|---|---|
-| PostgreSQL database | **Yes** | All app data: users, challenges, submissions, scores, job applications, notification log | [Neon](https://neon.tech) (free, does not expire), [Render Postgres](https://render.com/docs/postgresql) (free tier expires after 30 days), [Supabase](https://supabase.com) |
-| Backend host | **Yes** | Runs the FastAPI API, migrations and the nightly scheduler | Render Web Service (Docker) |
+| PostgreSQL database | **Yes** | All app data: users, challenges, submissions, scores, job applications, notification log | [Render Postgres](https://render.com/docs/postgresql) (created by the Blueprint; the free tier expires after 30 days), [Neon](https://neon.tech) (free, does not expire), [Supabase](https://supabase.com) |
+| API host | **Yes** | Runs FastAPI, migrations and the nightly scheduler | Render Web Service, Python runtime |
 | Frontend host | **Yes** | Serves the built React app | Render Static Site, or Vercel (`frontend/vercel.json` is already set up) |
 | Anthropic API key | No | AI grading of article submissions. Without it, articles show "not configured" and admins grade them by hand | [console.anthropic.com](https://console.anthropic.com) > API Keys |
 | Meta WhatsApp Cloud API | No | Sending lag nudges. The default provider is `console`, which only writes the messages to the logs | [developers.facebook.com](https://developers.facebook.com) > WhatsApp > API Setup |
 
-The app has no third-party auth, email, SMS or file storage. Login is email and password, with JWTs signed by
-`JWT_SECRET`.
+Login is email and password, with JWTs signed by `JWT_SECRET`. The app has no OAuth, email, SMS or file storage.
 
 ---
 
 ## 3. Environment variables
 
 Templates with placeholders:
-- [`backend/.env.example`](backend/.env.example): the backend's variables, for local runs and as a reference for Render.
-- [`.env.example`](.env.example): the variables `docker compose` reads.
-- [`frontend/.env.example`](frontend/.env.example): the frontend's build-time variable.
+- [`backend/.env.example`](backend/.env.example): copy it to `backend/.env`.
+- [`frontend/.env.example`](frontend/.env.example): copy it to `frontend/.env`. You only need it to point a local
+  build at a remote API.
 
-Copy a template to `.env` and fill it in. `.env` files are gitignored. **Never commit real values.**
+`.env` files are gitignored. **Never commit real values.** On Render, set the variables in each service's
+**Environment** tab instead.
 
 ### Backend (`classtrack-api`)
 
 | Variable | Required? | Purpose | Example format | Where to get it |
 |---|---|---|---|---|
-| `DATABASE_URL` | **Yes** | Postgres connection string. `postgres://` and `postgresql://` URLs are accepted as-is | `postgresql://USER:PASSWORD@HOST/DB?sslmode=require` | Neon: Dashboard > Connection Details. Render: database page > *Internal Database URL* |
+| `DATABASE_URL` | **Yes** | Postgres connection string. `postgres://` and `postgresql://` are converted to SQLAlchemy's psycopg 3 driver automatically | `postgresql://USER:PASSWORD@HOST:5432/DB` | Render Postgres: the Blueprint wires it in (or use the database page > **Internal Database URL**). Neon: Dashboard > Connection Details |
 | `JWT_SECRET` | **Yes** | Signs login tokens. Defaults to the insecure `change-me` if unset | 48+ random characters | `python -c "import secrets; print(secrets.token_urlsafe(48))"`. The Blueprint generates one |
 | `ADMIN_EMAILS` | **Yes** (for an admin) | Accounts registered with these emails become admins | `you@example.com,ta@example.com` | You choose |
-| `CORS_ORIGINS` | **Yes** (in production) | Browser origins allowed to call the API | `https://classtrack-web.onrender.com` | Your frontend's URL, without a trailing slash |
+| `CORS_ORIGINS` | **Yes** (in production) | Comma-separated browser origins allowed to call the API. Defaults to `http://localhost:3000,http://localhost:5173` | `https://classtrack-web.onrender.com` | Your static site's URL: scheme included, no trailing slash |
+| `PYTHON_VERSION` | Render only | Python version Render installs | `3.13` | — |
+| `FORWARDED_ALLOW_IPS` | Render only | Makes uvicorn trust Render's proxy headers, so the app sees the real client IP and `https` | `*` | — |
 | `TIMEZONE` | No (default `UTC`) | Defines "today", day numbers and the nightly job time | `Africa/Lagos` | An [IANA tz name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) |
 | `ANTHROPIC_API_KEY` | No | Turns on AI grading | `sk-ant-...` | console.anthropic.com |
 | `GRADING_MODEL` | No (default `claude-opus-5`) | Claude model used for grading | `claude-opus-5` | Anthropic model list |
@@ -99,65 +95,80 @@ Copy a template to `.env` and fill it in. `.env` files are gitignored. **Never c
 | `SCHEDULER_ENABLED` | No (default `true`) | Runs the nightly lag check and the weekly digest in-process. Enable it on exactly one instance | `true` | — |
 | `LAG_CHECK_HOUR` | No (default `20`) | Hour, in `TIMEZONE`, of the lag check | `20` | — |
 | `WEEKLY_DIGEST_DAY` | No (default `sun`) | Day of the admin digest | `sun` | — |
-| `PORT` | Set by Render | Port the API listens on. Defaults to 8000 locally | `10000` | Render sets it automatically, so don't add it |
+| `PORT` | Set by Render | Port the API listens on | `10000` | Render sets it automatically, so don't add it |
 
 ### Frontend (`classtrack-web`)
 
-These are build-time variables. After changing one, you must **rebuild**; a restart is not enough.
+Vite reads these at **build time**. After changing one, you must rebuild the site; a restart is not enough.
 
 | Variable | Required? | Purpose | Example format | Where to get it |
 |---|---|---|---|---|
-| `VITE_API_URL` | **Yes** (in production) | Base URL of the API. If unset, the app calls `/api`, which only works with the local proxies | `https://classtrack-api.onrender.com` | Your backend service's URL, without a trailing slash |
-| `NODE_VERSION` | Render only | Node version used for the build | `22` | — |
+| `VITE_API_URL` | **Yes** (in production) | Base URL of the API. If unset, the app calls `/api`, which only works with the Vite dev proxy | `https://classtrack-api.onrender.com` | The API service's URL in Render, without a trailing slash |
+| `NODE_VERSION` | Render only | Node version used for the build. Vite 8 needs Node 20.19 or later | `22` | — |
 
 ---
 
 ## 4. Deploying on Render
 
-The repo deploys as two services, plus an external database:
-
 ```
-browser ──> classtrack-web (Static Site, frontend/dist)
+browser ──> classtrack-web (Static Site: frontend/dist)
    │
-   └──fetch──> classtrack-api (Docker, backend/Dockerfile) ──> Postgres (Neon or Render)
+   └──fetch──> classtrack-api (Python web service) ──> classtrack-db (Render Postgres)
 ```
+
+Create things in this order: **database → API → frontend → update `CORS_ORIGINS`**. The Blueprint does the
+first three in one step.
 
 ### Option 1: Blueprint (recommended)
 
-1. Push this repo to GitHub, including `render.yaml`.
-2. Create a Postgres database, for example on Neon, and copy its connection string.
-3. In Render, go to **New > Blueprint**, pick the repo and click **Apply**.
-4. Render asks for each `sync: false` value:
-   - `DATABASE_URL`: your Postgres connection string.
+1. Push the repo, including `render.yaml`, to GitHub.
+2. In Render, go to **New > Blueprint**, pick the repo and click **Apply**. Render asks for each `sync: false`
+   value:
    - `ADMIN_EMAILS`: your email address.
-   - `CORS_ORIGINS`: `https://classtrack-web.onrender.com`. Use the static site's real URL; if the name is taken, Render adds a suffix.
-   - `VITE_API_URL`: `https://classtrack-api.onrender.com`. Again, use the API's real URL.
+   - `CORS_ORIGINS`: `https://classtrack-web.onrender.com`. This is a guess at the URL; you'll fix it in step 4.
+   - `VITE_API_URL`: `https://classtrack-api.onrender.com`. Also a guess; fixed in step 4.
    - `ANTHROPIC_API_KEY` and the `WHATSAPP_*` values can be left blank.
-5. Wait for both deploys to finish. If the real URLs differ from what you entered, fix `CORS_ORIGINS` (API) and
-   `VITE_API_URL` (web) under each service's **Environment** tab. Then redeploy: the web service needs
-   **Clear build cache & deploy**, because `VITE_API_URL` is read at build time.
-6. Open the web URL and register with an `ADMIN_EMAILS` address (see section 6).
+3. Render creates `classtrack-db`, then `classtrack-api`, with `DATABASE_URL` wired from the database and
+   `JWT_SECRET` generated. Then it creates `classtrack-web`.
+4. Check the real URLs at the top of each service page. If Render added a suffix, for example
+   `classtrack-api-x1y2.onrender.com`:
+   - **API > Environment**: set `CORS_ORIGINS` to the web URL. Saving redeploys the API.
+   - **Web > Environment**: set `VITE_API_URL` to the API URL, then **Manual Deploy > Clear build cache & deploy**.
+5. Open the web URL and create the admin account (section 6).
 
-### Option 2: Fix an existing service by hand (the one that failed)
+**Using Neon instead of Render Postgres:** before you apply, delete the `databases:` block in `render.yaml` and
+replace the `DATABASE_URL` entry with `- key: DATABASE_URL` / `sync: false`. Then paste the Neon connection string
+when Render asks.
 
-**Backend: Web Service, Runtime Docker.** Under **Settings > Build & Deploy**:
+### Option 2: Create or fix the services by hand
+
+**1. Database:** **New > Postgres**. Name it `classtrack-db`, choose the same region you'll use for the API, and
+pick a plan. When it's ready, copy the **Internal Database URL**. (Or use a Neon connection string.)
+
+**2. API:** **New > Web Service**, then pick the repo.
+
+If you're fixing the existing service that fails with the Dockerfile error: you can't change a service's runtime
+from Docker to Python. Delete that service and create a new one, or ignore it.
 
 | Setting | Value |
 |---|---|
-| Root Directory | *(leave empty)* |
-| Dockerfile Path | `./backend/Dockerfile` |
-| Docker Build Context Directory | `./backend` |
-| Docker Command | *(leave empty: the image migrates, then starts uvicorn on `$PORT`)* |
-| Health Check Path | `/health` |
+| Runtime / Language | **Python 3** |
+| Root Directory | `backend` |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
+| Health Check Path | `/health` (under **Advanced**) |
 
-Alternatively, set **Root Directory** to `backend` and keep Dockerfile Path `./Dockerfile` and Context `.`.
-Then add the backend variables from section 3 under **Environment**, and use **Manual Deploy > Deploy latest commit**.
+Environment:
+- `DATABASE_URL`: the URL from step 1.
+- `JWT_SECRET`: a long random string.
+- `ADMIN_EMAILS`: your email address.
+- `CORS_ORIGINS`: leave it for now; you'll set it in step 4.
+- `PYTHON_VERSION=3.13` and `FORWARDED_ALLOW_IPS=*`.
+- Optionally `ANTHROPIC_API_KEY`.
 
-There's no separate build or start command to set: the Dockerfile installs the requirements, and the
-container's entrypoint runs `alembic upgrade head` and then
-`uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+The start command runs migrations on every deploy, so you don't need a separate migration step.
 
-**Frontend: New > Static Site.**
+**3. Frontend:** **New > Static Site**, then pick the repo.
 
 | Setting | Value |
 |---|---|
@@ -167,33 +178,33 @@ container's entrypoint runs `alembic upgrade head` and then
 | Environment | `VITE_API_URL=https://<your-api>.onrender.com`, `NODE_VERSION=22` |
 | Redirects/Rewrites | Source `/*`, Destination `/index.html`, Action **Rewrite** |
 
-Don't deploy `frontend/Dockerfile` on Render. Its nginx config proxies to `backend:8000`, a hostname that only
-exists inside docker-compose.
+**4. Close the loop:** set the API's `CORS_ORIGINS` to the static site's URL, for example
+`https://classtrack-web.onrender.com`, and save. The API redeploys.
 
 ### Free-plan caveats
 
-- Free web services sleep after 15 minutes without traffic. The first request after that takes about 30–60
-  seconds, and **the in-process scheduler doesn't run while the service is asleep**, so the 8pm lag check and the
-  weekly digest can be missed. Use a paid instance for reliable nudges, or trigger the checks yourself from the
-  admin page (`POST /admin/notify/run`).
-- Free Render Postgres databases expire after 30 days. Neon's free tier doesn't.
+- Free web services sleep after 15 minutes without traffic, and the first request after that takes about 30–60
+  seconds. **The scheduler doesn't run while the service is asleep**, so the 8pm lag check and the weekly digest
+  can be missed. Use a paid instance for reliable nudges, or run the checks yourself from the admin page.
+- Free Render Postgres databases expire after 30 days. Back up your data or move to a paid plan or Neon before
+  then.
 
 ---
 
-## 5. Common deploy errors
+## 5. Troubleshooting
 
-| Error | Cause | Fix |
+| Symptom | Cause | Fix |
 |---|---|---|
-| `failed to read dockerfile: open Dockerfile: no such file or directory` | Render looks for `./Dockerfile` at the repo root, but the backend's is at `backend/Dockerfile` | Set Dockerfile Path `./backend/Dockerfile` and Build Context `./backend`, or set Root Directory to `backend`. Or use the Blueprint |
-| `No open ports detected` / `Port scan timeout` | The app isn't listening on `$PORT`, or the container crashed before it started | The image binds to `0.0.0.0:$PORT`. Check the logs above this line: it's usually a migration or database error |
-| `connection refused` / `could not translate host name` at startup | `DATABASE_URL` is missing or wrong. `localhost` doesn't work on Render | Paste the provider's full connection string. For Render Postgres in the same region, use the **Internal** URL |
-| `SSL connection is required` / `sslmode` errors | The host requires TLS | Append `?sslmode=require` (Neon's URLs already include it) |
-| `prepared statement "_pg3_x" does not exist` | A transaction-mode connection pooler (PgBouncer) | Use the database's direct, non-pooler host, for example the Neon host without `-pooler` |
-| `alembic ... Can't locate revision` | The database was migrated by a different branch of the code | Point the API at a fresh database, or fix the `alembic_version` table |
-| Blocked by CORS policy (browser console) | `CORS_ORIGINS` doesn't include the frontend URL exactly | Set it to `https://<web>.onrender.com`: scheme included, no trailing slash. Then redeploy the API |
-| Frontend calls `/api/...` and gets 404 | `VITE_API_URL` wasn't set when the site was built | Set it, then **Clear build cache & deploy** the static site |
-| Refreshing `/leaderboard` gives 404 | The SPA rewrite is missing | Add the rewrite rule `/*` → `/index.html` |
-| Static build fails with a Vite/Node version error | Render's default Node version is too old for Vite 8 | Set `NODE_VERSION=22` |
+| `failed to read dockerfile: open Dockerfile: no such file or directory` | The service was created with the **Docker** runtime, and this repo has no Dockerfile | A service's runtime can't be changed after creation. Create a new **Python** web service (section 4, Option 2), or use the Blueprint, then delete the Docker service |
+| `No open ports detected` / `Port scan timeout` / "Application failed to respond" | The app isn't listening on `0.0.0.0:$PORT`, or it crashed before starting | Use the exact start command above. Check the earlier log lines: a crash in `alembic upgrade head` usually means a database problem |
+| `ModuleNotFoundError: No module named 'app'` | Root Directory isn't `backend` | Set Root Directory to `backend` |
+| Build fails while installing packages, or the wrong Python is used | The Python version isn't pinned | Set `PYTHON_VERSION=3.13` (`backend/.python-version` sets it too) |
+| `connection refused` / `could not translate host name` / `localhost` in the logs | `DATABASE_URL` is missing or wrong. `localhost` doesn't exist on Render | Paste the full connection string. For Render Postgres in the same region, use the **Internal** URL. Other providers usually need `?sslmode=require` |
+| `prepared statement "_pg3_x" does not exist` | A transaction-mode pooler (PgBouncer) | Use the direct, non-pooler host, for example the Neon host without `-pooler` |
+| Browser console: blocked by CORS policy | `CORS_ORIGINS` doesn't exactly match the site's origin | Set it to `https://<web>.onrender.com`: scheme included, no trailing slash. Separate several origins with commas, then let the API redeploy |
+| The frontend calls `/api/...` and gets 404, or calls `localhost:8000` | `VITE_API_URL` wasn't set when the site was built | Set it, then **Clear build cache & deploy** the static site |
+| Refreshing `/leaderboard` or `/grading/12` gives 404 | The SPA rewrite is missing | Add a rewrite rule: source `/*`, destination `/index.html` |
+| The first request takes about a minute; nightly nudges don't arrive | Free-tier spin-down | Expected on the free plan. Upgrade the API instance to keep it awake |
 
 ---
 
@@ -202,13 +213,13 @@ exists inside docker-compose.
 There's no default admin. A user becomes an admin **when they register** with an email listed in
 `ADMIN_EMAILS`:
 
-1. Set `ADMIN_EMAILS=you@example.com` on the API service and deploy.
+1. Set `ADMIN_EMAILS=you@example.com` on the API service, and let it deploy.
 2. Open the web app and register with that email, using a password of at least 8 characters.
 3. That account can now open `/admin`, create challenges and promote others through
    `PATCH /admin/members/{id}/role?is_admin=true`.
 
-If you registered **before** setting `ADMIN_EMAILS`, the flag isn't applied after the fact. Either register
-another account, or promote yourself in SQL (Neon SQL editor or `psql`):
+If you registered **before** setting `ADMIN_EMAILS`, the flag isn't applied after the fact. Promote yourself in
+SQL, either from the database's **Shell / psql** command on Render or from Neon's SQL editor:
 
 ```sql
 UPDATE users SET is_admin = true WHERE email = 'you@example.com';

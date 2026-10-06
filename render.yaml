@@ -2,20 +2,24 @@
 # Dashboard > New > Blueprint > pick this repo. Keys marked `sync: false` are
 # prompted for on first creation and never stored in git.
 services:
-  # FastAPI backend (Docker). Migrations run on every start (backend/docker-entrypoint.sh).
+  # FastAPI backend (native Python). Migrations run before every start.
   - type: web
     name: classtrack-api
-    runtime: docker
+    runtime: python
     plan: free
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
-    buildFilter:
-      paths:
-        - backend/**
     envVars:
-      - key: DATABASE_URL # Neon / Supabase / Render Postgres connection string
-        sync: false
+      - key: PYTHON_VERSION
+        value: "3.13"
+      - key: FORWARDED_ALLOW_IPS # trust Render's proxy headers (client IP, https scheme)
+        value: "*"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: classtrack-db
+          property: connectionString
       - key: JWT_SECRET
         generateValue: true
       - key: ADMIN_EMAILS # comma separated; these users become admins on register
@@ -49,11 +53,9 @@ services:
   - type: web
     name: classtrack-web
     runtime: static
-    buildCommand: cd frontend && npm ci && npm run build
-    staticPublishPath: ./frontend/dist
-    buildFilter:
-      paths:
-        - frontend/**
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
     headers:
       - path: /assets/*
         name: Cache-Control
@@ -63,19 +65,15 @@ services:
         source: /*
         destination: /index.html
     envVars:
-      - key: VITE_API_URL # the API URL, e.g. https://classtrack-api.onrender.com (no trailing slash)
+      - key: VITE_API_URL # the API's public URL, e.g. https://classtrack-api.onrender.com (no trailing slash)
         sync: false
       - key: NODE_VERSION
         value: "22"
 
-# To use Render Postgres instead of an external database, uncomment this and replace
-# the DATABASE_URL entry above with:
-#      - key: DATABASE_URL
-#        fromDatabase:
-#          name: classtrack-db
-#          property: connectionString
-# databases:
-#   - name: classtrack-db
-#     plan: free # free Render databases expire after 30 days
-#     databaseName: classtrack
-#     user: classtrack
+# Render Postgres. Free databases expire after 30 days. To use Neon/Supabase instead,
+# delete this block and change DATABASE_URL above to `sync: false`.
+databases:
+  - name: classtrack-db
+    plan: free
+    databaseName: classtrack
+    user: classtrack
