@@ -29,7 +29,7 @@ services:
       - key: ANTHROPIC_API_KEY # optional; AI grading is off without it
         sync: false
       - key: GRADING_MODEL
-        value: claude-opus-5
+        value: claude-opus-5-5
       - key: TIMEZONE
         value: UTC
       - key: ADMIN_CAN_VIEW_JOB_APPLICATIONS

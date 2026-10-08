@@ -25,7 +25,7 @@ class Settings(BaseSettings):
 
     # AI grading (Claude API). Grading is skipped when no key is configured.
     anthropic_api_key: str | None = None
-    grading_model: str = "claude-opus-5"
+    grading_model: str = "claude-opus-5-5"
     article_max_chars: int = 60_000
 
     # WhatsApp: "console" logs messages instead of sending; "meta" uses the Cloud API.
