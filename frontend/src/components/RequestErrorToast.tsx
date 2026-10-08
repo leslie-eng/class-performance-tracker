@@ -3,7 +3,10 @@ import { useEffect, useState } from 'react'
 import { ApiError } from '../lib/api'
 import { ErrorBanner, Icon } from './ui'
 
-let show: (err: unknown) => void = () => {}
+let show: (err: unknown) => void = (err: unknown) => {
+  pendingError = err
+}
+let pendingError: unknown = null
 
 /**
  * QueryCache onError hook for failed data loads. Mutations show their own inline ErrorBanner;
@@ -20,8 +23,15 @@ export function RequestErrorToast() {
 
   useEffect(() => {
     show = setError
+    // Flush any error reported before mount
+    if (pendingError) {
+      setError(pendingError)
+      pendingError = null
+    }
     return () => {
-      show = () => {}
+      show = (err) => {
+        pendingError = err
+      }
     }
   }, [])
 

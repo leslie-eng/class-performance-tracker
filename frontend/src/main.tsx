@@ -13,8 +13,8 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 30_000,
-      // Retry network errors (status 0) and 5xx; a 4xx won't change on retry.
-      retry: (count, err) => !(err instanceof ApiError && err.status > 0 && err.status < 500) && count < 2,
+      // Only retry 5xx server errors, not client errors (4xx) or network/CORS misconfigurations (status 0).
+      retry: (count, err) => err instanceof ApiError && err.status >= 500 && count < 2,
       refetchOnWindowFocus: true,
     },
   },
