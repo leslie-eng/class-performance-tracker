@@ -1,8 +1,9 @@
 from datetime import date, datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl, model_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl, field_validator, model_validator
 
+from app.config import get_settings
 from app.models import (
     ApplicationSource,
     ApplicationStatus,
@@ -39,6 +40,7 @@ class UserOut(ORM):
     phone_number: str | None
     is_admin: bool
     whatsapp_opt_in: bool
+    specialization: str | None = None
     joined_at: datetime
 
 
@@ -46,6 +48,15 @@ class UserUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=120)
     phone_number: str | None = Field(default=None, pattern=r"^\+?[1-9]\d{7,14}$")
     whatsapp_opt_in: bool | None = None
+    specialization: str | None = None
+
+    @field_validator("specialization")
+    @classmethod
+    def known_specialization(cls, value: str | None) -> str | None:
+        allowed = get_settings().specialization_list
+        if value is not None and value not in allowed:
+            raise ValueError(f"must be one of: {', '.join(allowed)}")
+        return value
 
 
 # --- challenges ------------------------------------------------------------

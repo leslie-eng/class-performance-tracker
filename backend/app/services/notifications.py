@@ -133,10 +133,14 @@ def _deliver(
     kind: NotificationType,
     message: str,
     today: date,
+    template: str | None = None,
 ) -> bool:
     status, error = NotificationStatus.sent, None
     try:
-        sender.send(user.phone_number, message)
+        if template:
+            sender.send(user.phone_number, message, template=template)
+        else:
+            sender.send(user.phone_number, message)
     except WhatsAppError as e:
         status, error = NotificationStatus.failed, str(e)
         log.warning("WhatsApp send to user %s failed: %s", user.id, e)

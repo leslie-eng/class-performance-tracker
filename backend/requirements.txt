@@ -12,3 +12,4 @@ httpx>=0.28
 beautifulsoup4>=4.12
 anthropic>=1.8
 apscheduler>=3.11,<4
+pypdf>=6.0

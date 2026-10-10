@@ -7,6 +7,7 @@ text message is sent, which only works after the member has messaged the bot.
 """
 
 import logging
+import re
 from typing import Protocol
 
 import httpx
@@ -16,21 +17,29 @@ from app.config import get_settings
 log = logging.getLogger(__name__)
 
 GRAPH_API = "https://graph.facebook.com/v21.0"
+TEMPLATE_PARAM_MAX = 900  # stay well under Meta's template body limit
 
 
 class WhatsAppError(Exception):
     pass
 
 
+def one_line(text: str, limit: int = TEMPLATE_PARAM_MAX) -> str:
+    """Make text safe for a template body parameter: Meta rejects newlines, tabs
+    and runs of more than four spaces."""
+    flat = re.sub(r"\s+", " ", text.replace("\r", " ")).strip()
+    return flat if len(flat) <= limit else flat[: limit - 1].rstrip() + "…"
+
+
 class WhatsAppSender(Protocol):
-    def send(self, phone_number: str, message: str) -> None: ...
+    def send(self, phone_number: str, message: str, template: str | None = None) -> None: ...
 
 
 class ConsoleSender:
     """Development sender: logs instead of sending."""
 
-    def send(self, phone_number: str, message: str) -> None:
-        log.info("[whatsapp -> %s] %s", phone_number, message)
+    def send(self, phone_number: str, message: str, template: str | None = None) -> None:
+        log.info("[whatsapp -> %s%s] %s", phone_number, f" template={template}" if template else "", message)
 
 
 class MetaCloudSender:
@@ -39,17 +48,19 @@ class MetaCloudSender:
         self.url = f"{GRAPH_API}/{phone_number_id}/messages"
         self.template = template
 
-    def send(self, phone_number: str, message: str) -> None:
+    def send(self, phone_number: str, message: str, template: str | None = None) -> None:
+        """`template` overrides the default (lag) template for this one message."""
         to = phone_number.lstrip("+")
-        if self.template:
+        template = template or self.template
+        if template:
             payload = {
                 "messaging_product": "whatsapp",
                 "to": to,
                 "type": "template",
                 "template": {
-                    "name": self.template,
+                    "name": template,
                     "language": {"code": "en"},
-                    "components": [{"type": "body", "parameters": [{"type": "text", "text": message}]}],
+                    "components": [{"type": "body", "parameters": [{"type": "text", "text": one_line(message)}]}],
                 },
             }
         else:

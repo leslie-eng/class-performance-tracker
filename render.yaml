@@ -30,8 +30,8 @@ services:
         sync: false
       - key: GRADING_MODEL
         value: claude-opus-5
-      - key: TIMEZONE
-        value: UTC
+      - key: TIMEZONE # also moves "today" for streaks and the 8pm lag check
+        value: Africa/Nairobi
       - key: ADMIN_CAN_VIEW_JOB_APPLICATIONS
         value: "false"
       - key: WHATSAPP_PROVIDER # console | meta
@@ -48,6 +48,32 @@ services:
         value: "20"
       - key: WEEKLY_DIGEST_DAY
         value: sun
+      # Friday Drop (weekly summary, project picks, quizzes)
+      - key: WEEKLY_DROP_DAY
+        value: fri
+      - key: WEEKLY_DROP_HOUR
+        value: "8"
+      - key: MONTHLY_QUIZ_WEEK # first | last Friday of the month
+        value: first
+      - key: SPECIALIZATIONS
+        value: data_engineering,data_science,software_engineering,ai_engineering,embedded_iot,general
+      - key: QUIZ_MODEL # blank = GRADING_MODEL; a cheaper model works well for generation
+        sync: false
+      - key: REQUIRE_QUIZ_REVIEW # true = generated quizzes wait for an admin to publish them
+        value: "false"
+      - key: FRONTEND_URL # links in WhatsApp messages, e.g. https://classtrack-web.onrender.com
+        sync: false
+      - key: WHATSAPP_WEEKLY_TEMPLATE # approved Meta template (one body parameter) for drops and admin alerts
+        sync: false
+      - key: JOB_TOKEN # shared secret for the external cron that wakes the API on Fridays
+        generateValue: true
+      # Coding exercises: none = browser runs only; remote = external Judge0-compatible sandbox
+      - key: CODE_RUNNER
+        value: none
+      - key: CODE_RUNNER_URL
+        sync: false
+      - key: CODE_RUNNER_KEY
+        sync: false
 
   # React frontend (static site). It calls the API directly at VITE_API_URL.
   - type: web

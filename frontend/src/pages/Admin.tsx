@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
+import { ClassNotesForm } from '../components/ClassNotesForm'
 import { Avatar, ErrorBanner, Icon } from '../components/ui'
 import { api } from '../lib/api'
 import { addDays } from '../lib/dates'
 import { keys, useChallenges } from '../lib/queries'
 import { useSession } from '../lib/session'
-import type { Challenge, LaggingMember, TaskTypes, User } from '../lib/types'
+import type { Challenge, DropPreview, LaggingMember, TaskTypes, User } from '../lib/types'
 
 interface NotificationRow {
   id: number
@@ -22,11 +23,12 @@ export default function AdminPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-headline-lg text-ink md:text-[28px]">Admin</h1>
-        <p className="text-body-md text-on-surface-variant">Manage challenges, members and WhatsApp nudges.</p>
+        <p className="text-body-md text-on-surface-variant">Manage challenges, members, the Friday Drop and WhatsApp nudges.</p>
       </div>
       <div className="grid gap-6 xl:grid-cols-2">
         <CreateChallenge />
         <ChallengeList />
+        <FridayDrop />
         <Nudges />
         <Members />
       </div>
@@ -163,6 +165,94 @@ function ChallengeList() {
         ))}
         {!challenges.data?.length && <li className="py-3 text-body-md text-on-surface-variant">No challenges yet.</li>}
       </ul>
+    </section>
+  )
+}
+
+function FridayDrop() {
+  const qc = useQueryClient()
+  const [preview, setPreview] = useState<DropPreview | null>(null)
+  const [monthly, setMonthly] = useState<{ dry_run: boolean; quizzes: { kind: string; specialization: string | null; duration: number; status: string }[]; notified: number } | null>(null)
+  const drop = useMutation({
+    mutationFn: ({ dry, week }: { dry: boolean; week: 'current' | 'upcoming' }) =>
+      api<DropPreview>(`/admin/weekly/drop/run?dry_run=${dry}&week=${week}`, { method: 'POST' }),
+    onSuccess: (r) => {
+      setPreview(r)
+      qc.invalidateQueries({ queryKey: ['admin', 'notifications'] })
+    },
+  })
+  const runMonthly = useMutation({
+    mutationFn: (dry: boolean) => api<NonNullable<typeof monthly>>(`/admin/monthly/run?dry_run=${dry}`, { method: 'POST' }),
+    onSuccess: setMonthly,
+  })
+
+  return (
+    <section className="card p-6 xl:col-span-2">
+      <h2 className="flex items-center gap-2 text-headline-md text-ink">
+        <Icon name="event_note" className="text-primary-container" /> Friday Drop
+      </h2>
+      <p className="mt-1 text-body-md text-on-surface-variant">
+        Goes out every Friday morning: the class-notes summary, the two projects and the quizzes. Members can add notes too.
+      </p>
+      <div className="mt-4 grid gap-6 lg:grid-cols-2">
+        <ClassNotesForm />
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-2">
+            <button className="btn-secondary" disabled={drop.isPending} onClick={() => drop.mutate({ dry: true, week: 'upcoming' })}>
+              <Icon name="visibility" className="text-[18px]" /> Preview next drop
+            </button>
+            <button className="btn-ghost" disabled={drop.isPending} onClick={() => drop.mutate({ dry: true, week: 'current' })}>
+              Preview this week's
+            </button>
+            <button className="btn-primary" disabled={drop.isPending} onClick={() => drop.mutate({ dry: false, week: 'current' })}>
+              <Icon name="send" className="text-[18px]" /> Send this week's drop
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button className="btn-secondary" disabled={runMonthly.isPending} onClick={() => runMonthly.mutate(true)}>
+              Preview monthly quizzes
+            </button>
+            <button className="btn-ghost" disabled={runMonthly.isPending} onClick={() => runMonthly.mutate(false)}>
+              Generate monthly quizzes now
+            </button>
+          </div>
+          <ErrorBanner error={drop.error ?? runMonthly.error} />
+          {(drop.isPending || runMonthly.isPending) && <p className="text-body-sm text-on-surface-variant">Working… generating quizzes can take a minute.</p>}
+          {preview && (
+            <div className="flex flex-col gap-2">
+              <p className="label">
+                {preview.dry_run ? 'Preview' : `Sent to ${preview.sent}`} · drop of {preview.week_key}
+                {preview.notes_missing && ' · no notes yet'}
+              </p>
+              <pre className="rounded-lg bg-surface-container-low p-3 font-mono text-label-sm whitespace-pre-wrap break-words text-ink">{preview.message}</pre>
+              <ul className="flex flex-col gap-1 text-body-sm">
+                {preview.recipients.map((r) => (
+                  <li key={r.user_id} className="flex justify-between gap-3">
+                    <span className="truncate text-ink">{r.name}</span>
+                    <span className="shrink-0 text-on-surface-variant">{r.status}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {monthly && (
+            <div>
+              <p className="label">{monthly.dry_run ? 'Monthly preview' : `Monthly quizzes · ${monthly.notified} notified`}</p>
+              <ul className="mt-1 flex flex-col gap-1 text-body-sm">
+                {monthly.quizzes.map((q) => (
+                  <li key={`${q.kind}-${q.specialization}-${q.duration}`} className="flex justify-between gap-3">
+                    <span className="text-ink">
+                      {q.kind}
+                      {q.specialization ? ` · ${q.specialization.replace(/_/g, ' ')}` : ''} · {q.duration} min
+                    </span>
+                    <span className="shrink-0 text-on-surface-variant">{q.status}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
     </section>
   )
 }

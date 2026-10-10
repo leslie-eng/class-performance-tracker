@@ -41,6 +41,26 @@ class Settings(BaseSettings):
 
     cors_origins: str = "http://localhost:3000,http://localhost:5173"
 
+    # Member specializations (interview-prep quizzes); validated in schemas, not the DB.
+    specializations: str = "data_engineering,data_science,software_engineering,ai_engineering,embedded_iot,general"
+
+    # Friday Drop: weekly summary, project pick and quizzes.
+    weekly_drop_day: str = "fri"
+    weekly_drop_hour: int = 8
+    monthly_quiz_week: str = "first"  # first | last
+    quiz_model: str | None = None  # defaults to grading_model
+    require_quiz_review: bool = False  # generated quizzes start as drafts when true
+    frontend_url: str = "http://localhost:5173"  # for links in WhatsApp messages
+    whatsapp_weekly_template: str | None = None
+    # Shared secret for POST /internal/jobs/* (external cron). Endpoint is off when unset.
+    job_token: str | None = None
+
+    # Coding exercises: member code never runs on the API host. "remote" sends it to
+    # an external sandbox (e.g. self-hosted Judge0); "none" means browser runs only.
+    code_runner: str = "none"
+    code_runner_url: str | None = None
+    code_runner_key: str | None = None
+
     @field_validator("database_url")
     @classmethod
     def use_psycopg3(cls, url: str) -> str:
@@ -54,6 +74,14 @@ class Settings(BaseSettings):
     @property
     def tz(self) -> ZoneInfo:
         return ZoneInfo(self.timezone)
+
+    @property
+    def specialization_list(self) -> list[str]:
+        return [s.strip() for s in self.specializations.split(",") if s.strip()]
+
+    @property
+    def quiz_model_name(self) -> str:
+        return self.quiz_model or self.grading_model
 
     @property
     def admin_email_set(self) -> set[str]:

@@ -11,6 +11,18 @@ members who are falling behind and can send them a WhatsApp nudge, and admins ge
 | Web app | React 19, TypeScript, Vite (builds to `dist/`), Tailwind v4, React Router, TanStack Query | [`frontend/`](frontend/) ([UI notes](frontend/README.md)) |
 | Database | PostgreSQL (SQLite works only for tests) | external |
 
+Besides daily tasks, members get:
+- **The Friday Drop** (`/weekly`): every Friday at 08:00 (`TIMEZONE`), a summary of the week's class notes, a pick
+  between the two projects members proposed, and a timed quiz (10, 20 or 30 minutes, easy to hard). On the first
+  Friday of the month, an interview-prep quiz for the member's specialization and a whole-course quiz come out too.
+  Opted-in members also get a one-line WhatsApp message.
+- **Coding exercises** (`/code`): coursework in an in-browser editor. Python runs with Pyodide and JavaScript in a
+  sandboxed worker, in the member's own browser, never on the server. AI feedback follows every submission.
+- **Learning materials** (admins, `/admin/materials`): notes, links and `.md`/`.txt`/`.pdf` files that quizzes and
+  draft exercises are generated from, with a review screen for both.
+
+Quiz and coding points are kept separate from the challenge leaderboard and streaks.
+
 The repo is a monorepo with two apps. Neither uses Docker. On Render they run as a **Python web service** and a
 **Static Site**, both defined in [`render.yaml`](render.yaml).
 
@@ -58,9 +70,11 @@ Tests: `cd backend && pip install -r requirements-dev.txt && pytest`. By default
 | API host | **Yes** | Runs FastAPI, migrations and the nightly scheduler | Render Web Service, Python runtime |
 | Frontend host | **Yes** | Serves the built React app | Render Static Site, or Vercel (`frontend/vercel.json` is already set up) |
 | Anthropic API key | No | AI grading of article submissions. Without it, articles show "not configured" and admins grade them by hand | [console.anthropic.com](https://console.anthropic.com) > API Keys |
-| Meta WhatsApp Cloud API | No | Sending lag nudges. The default provider is `console`, which only writes the messages to the logs | [developers.facebook.com](https://developers.facebook.com) > WhatsApp > API Setup |
+| Meta WhatsApp Cloud API | No | Sending lag nudges and the Friday Drop. The default provider is `console`, which only writes the messages to the logs | [developers.facebook.com](https://developers.facebook.com) > WhatsApp > API Setup |
+| External cron | Recommended on free Render | Wakes the sleeping API on Friday morning so the drop goes out on time | [cron-job.org](https://cron-job.org) (free) or a GitHub Actions schedule; see [DEPLOYMENT.md](DEPLOYMENT.md) |
+| Code sandbox | No | Verified runs of coding exercises, including hidden tests | Self-hosted [Judge0](https://github.com/judge0/judge0) on its own server. Not part of the free setup |
 
-Login is email and password, with JWTs signed by `JWT_SECRET`. The app has no OAuth, email, SMS or file storage.
+Login is email and password, with JWTs signed by `JWT_SECRET`. The app has no OAuth, email, SMS or file storage: uploaded learning materials keep only their extracted text, in Postgres.
 
 ---
 
@@ -84,8 +98,8 @@ Templates with placeholders:
 | `CORS_ORIGINS` | **Yes** (in production) | Comma-separated browser origins allowed to call the API. Defaults to `http://localhost:3000,http://localhost:5173`. Read at startup, so the API must redeploy after a change. The API logs the list it's using as `CORS allowed origins: [...]` | `https://classtrack-web.onrender.com,http://localhost:5173` | Your static site's URL, scheme included. Keep the localhost entries if you also run the frontend locally against this API |
 | `PYTHON_VERSION` | Render only | Python version Render installs | `3.13` | — |
 | `FORWARDED_ALLOW_IPS` | Render only | Makes uvicorn trust Render's proxy headers, so the app sees the real client IP and `https` | `*` | — |
-| `TIMEZONE` | No (default `UTC`) | Defines "today", day numbers and the nightly job time | `Africa/Lagos` | An [IANA tz name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) |
-| `ANTHROPIC_API_KEY` | No | Turns on AI grading | `sk-ant-...` | console.anthropic.com |
+| `TIMEZONE` | No (default `UTC`; the Blueprint sets `Africa/Nairobi`) | Defines "today" for streaks and day numbers, the time of the nightly lag check, and the Friday Drop time. Changing it moves all three | `Africa/Nairobi` | An [IANA tz name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) |
+| `ANTHROPIC_API_KEY` | No | Turns on AI grading, weekly summaries, quiz and exercise generation, and code feedback. Without it these show "not configured" | `sk-ant-...` | console.anthropic.com |
 | `GRADING_MODEL` | No (default `claude-opus-5`) | Claude model used for grading | `claude-opus-5` | Anthropic model list |
 | `ADMIN_CAN_VIEW_JOB_APPLICATIONS` | No (default `false`) | Lets admins see members' job applications | `true` / `false` | You choose |
 | `WHATSAPP_PROVIDER` | No (default `console`) | `console` writes messages to the logs. `meta` sends them for real | `console` | — |
@@ -95,6 +109,16 @@ Templates with placeholders:
 | `SCHEDULER_ENABLED` | No (default `true`) | Runs the nightly lag check and the weekly digest in-process. Enable it on exactly one instance | `true` | — |
 | `LAG_CHECK_HOUR` | No (default `20`) | Hour, in `TIMEZONE`, of the lag check | `20` | — |
 | `WEEKLY_DIGEST_DAY` | No (default `sun`) | Day of the admin digest | `sun` | — |
+| `WEEKLY_DROP_DAY` / `WEEKLY_DROP_HOUR` | No (default `fri` / `8`) | When the Friday Drop goes out, in `TIMEZONE` | `fri` / `8` | — |
+| `MONTHLY_QUIZ_WEEK` | No (default `first`) | Which Friday of the month also releases the interview-prep and course quizzes | `first` or `last` | — |
+| `SPECIALIZATIONS` | No | Choices members can pick in Settings; the interview-prep quiz follows it (no choice = `general`) | `data_engineering,data_science,…,general` | You choose |
+| `QUIZ_MODEL` | No (default: `GRADING_MODEL`) | Claude model for summaries, digests, quiz and exercise generation | a cheaper Claude model | Anthropic model list |
+| `REQUIRE_QUIZ_REVIEW` | No (default `false`) | `true` keeps generated quizzes as drafts until an admin publishes them | `false` | — |
+| `FRONTEND_URL` | **Yes** for WhatsApp links | Link at the end of drop messages (`…/weekly`) | `https://classtrack-web.onrender.com` | Your static site's URL |
+| `WHATSAPP_WEEKLY_TEMPLATE` | Only if `meta` | Approved template with **one** body parameter, used for the drop and admin alerts. The message is sent as a single line | `weekly_drop` | Meta Business Manager > Message templates |
+| `JOB_TOKEN` | Recommended on free Render | Secret the external cron sends as `X-Job-Token` to `POST /internal/jobs/weekly-drop`. Unset turns the endpoint off | 32+ random characters | The Blueprint generates one; see [DEPLOYMENT.md](DEPLOYMENT.md) |
+| `CODE_RUNNER` | No (default `none`) | `none`: members run exercises in their browser (practice runs, reduced points). `remote`: an external sandbox runs every test, hidden ones included | `none` | — |
+| `CODE_RUNNER_URL` / `CODE_RUNNER_KEY` | Only if `remote` | Your Judge0-compatible sandbox and its auth token. It needs its own isolated host | `https://judge0.example.com` | Self-hosted Judge0; see [DEPLOYMENT.md](DEPLOYMENT.md) |
 | `PORT` | Set by Render | Port the API listens on | `10000` | Render sets it automatically, so don't add it |
 
 ### Frontend (`classtrack-web`)
@@ -182,6 +206,11 @@ The start command runs migrations on every deploy, so you don't need a separate 
 
 **4. Close the loop:** set the API's `CORS_ORIGINS` to the static site's URL, for example
 `https://classtrack-web.onrender.com`, and save. The API redeploys.
+
+### After the first deploy: Friday Drop setup
+
+The free instance sleeps, so the 08:00 scheduler can miss the drop. Set up the free external cron in
+[DEPLOYMENT.md](DEPLOYMENT.md#waking-the-api-for-the-friday-drop) (5 minutes), and set `FRONTEND_URL` on the API.
 
 ### Free-plan caveats
 

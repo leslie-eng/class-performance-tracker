@@ -17,13 +17,20 @@ function SettingsForm({ user }: { user: User }) {
   const [name, setName] = useState(user.name)
   const [phone, setPhone] = useState(user.phone_number ?? '')
   const [optIn, setOptIn] = useState(user.whatsapp_opt_in)
+  const [specialization, setSpecialization] = useState(user.specialization ?? '')
+  const { meta } = useSession()
   const [saved, setSaved] = useState(false)
 
   const save = useMutation({
     mutationFn: () =>
       api<User>('/auth/me', {
         method: 'PATCH',
-        json: { name: name.trim(), phone_number: phone.trim() || null, whatsapp_opt_in: optIn && !!phone.trim() },
+        json: {
+          name: name.trim(),
+          phone_number: phone.trim() || null,
+          whatsapp_opt_in: optIn && !!phone.trim(),
+          specialization: specialization || null,
+        },
       }),
     onSuccess: (u) => {
       qc.setQueryData(keys.me, u)
@@ -50,12 +57,24 @@ function SettingsForm({ user }: { user: User }) {
           <span className="label">Email</span>
           <input className="input bg-surface-container-low" value={user.email} disabled />
         </label>
+        <label className="flex flex-col gap-1.5">
+          <span className="label">Specialization</span>
+          <select className="input" value={specialization} onChange={(e) => setSpecialization(e.target.value)}>
+            <option value="">Not set (general)</option>
+            {(meta?.specializations ?? []).map((s) => (
+              <option key={s} value={s}>
+                {s.replace(/_/g, ' ')}
+              </option>
+            ))}
+          </select>
+          <span className="text-body-sm text-on-surface-variant">Sets the topic of your monthly interview-prep quiz.</span>
+        </label>
         <div className="flex flex-col gap-3 rounded-xl bg-surface-container-low p-4">
           <p className="flex items-center gap-2 font-semibold text-ink">
             <Icon name="chat" className="text-secondary" /> WhatsApp nudges
           </p>
           <p className="text-body-md text-on-surface-variant">
-            If you miss a couple of days in a row, we'll send a reminder to keep you on pace with the group.
+            The Friday Drop every week, and a reminder if you miss a couple of days in a row.
           </p>
           <label className="flex flex-col gap-1.5">
             <span className="label">Phone number (with country code)</span>
@@ -63,7 +82,7 @@ function SettingsForm({ user }: { user: User }) {
           </label>
           <label className="flex items-center gap-2 text-body-md text-ink">
             <input type="checkbox" className="h-[18px] w-[18px] accent-[#22c55e]" checked={optIn && !!phone.trim()} disabled={!phone.trim()} onChange={(e) => setOptIn(e.target.checked)} />
-            Send me WhatsApp nudges
+            Send me WhatsApp messages
           </label>
         </div>
         <ErrorBanner error={save.error} />
