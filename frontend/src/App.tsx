@@ -1,6 +1,7 @@
 import { lazy, Suspense, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { AppShell } from './components/AppShell'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { PageLoader } from './components/ui'
 import { useSession } from './lib/session'
 import AdminPage from './pages/Admin'
@@ -43,38 +44,42 @@ function RequireAdmin({ children }: { children: ReactNode }) {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route
-        element={
-          <RequireAuth>
-            <AppShell />
-          </RequireAuth>
-        }
-      >
-        <Route path="/" element={<RequireChallenge><DashboardPage /></RequireChallenge>} />
-        <Route path="/submit" element={<RequireChallenge><SubmitPage /></RequireChallenge>} />
-        <Route path="/leaderboard" element={<RequireChallenge><LeaderboardPage /></RequireChallenge>} />
-        <Route path="/grading" element={<GradingPage />} />
-        <Route path="/grading/:id" element={<GradingPage />} />
-        <Route path="/jobs" element={<JobsPage />} />
-        <Route path="/weekly" element={<WeeklyPage />} />
-        <Route path="/quiz/:attemptId" element={<QuizRunnerPage />} />
-        <Route path="/code" element={<CodePage />} />
+    // Wraps every route, so a render error in any page degrades to a recoverable
+    // fallback instead of a blank screen.
+    <ErrorBoundary>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
         <Route
-          path="/code/:id"
           element={
-            <Suspense fallback={<PageLoader />}>
-              <CodeExercisePage />
-            </Suspense>
+            <RequireAuth>
+              <AppShell />
+            </RequireAuth>
           }
-        />
-        <Route path="/join" element={<JoinPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/admin" element={<RequireAdmin><AdminPage /></RequireAdmin>} />
-        <Route path="/admin/materials" element={<RequireAdmin><AdminMaterialsPage /></RequireAdmin>} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        >
+          <Route path="/" element={<RequireChallenge><DashboardPage /></RequireChallenge>} />
+          <Route path="/submit" element={<RequireChallenge><SubmitPage /></RequireChallenge>} />
+          <Route path="/leaderboard" element={<RequireChallenge><LeaderboardPage /></RequireChallenge>} />
+          <Route path="/grading" element={<GradingPage />} />
+          <Route path="/grading/:id" element={<GradingPage />} />
+          <Route path="/jobs" element={<JobsPage />} />
+          <Route path="/weekly" element={<WeeklyPage />} />
+          <Route path="/quiz/:attemptId" element={<QuizRunnerPage />} />
+          <Route path="/code" element={<CodePage />} />
+          <Route
+            path="/code/:id"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <CodeExercisePage />
+              </Suspense>
+            }
+          />
+          <Route path="/join" element={<JoinPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/admin" element={<RequireAdmin><AdminPage /></RequireAdmin>} />
+          <Route path="/admin/materials" element={<RequireAdmin><AdminMaterialsPage /></RequireAdmin>} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </ErrorBoundary>
   )
 }
