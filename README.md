@@ -100,7 +100,7 @@ Templates with placeholders:
 | `FORWARDED_ALLOW_IPS` | Render only | Makes uvicorn trust Render's proxy headers, so the app sees the real client IP and `https` | `*` | — |
 | `TIMEZONE` | No (default `UTC`; the Blueprint sets `Africa/Nairobi`) | Defines "today" for streaks and day numbers, the time of the nightly lag check, and the Friday Drop time. Changing it moves all three | `Africa/Nairobi` | An [IANA tz name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) |
 | `ANTHROPIC_API_KEY` | No | Turns on AI grading, weekly summaries, quiz and exercise generation, and code feedback. Without it these show "not configured" | `sk-ant-...` | console.anthropic.com |
-| `GRADING_MODEL` | No (default `claude-opus-5`) | Claude model used for grading | `claude-opus-5` | Anthropic model list |
+| `GRADING_MODEL` | No (default `claude-opus-5-5`) | Claude model used for grading | `claude-opus-5-5` | Anthropic model list |
 | `ADMIN_CAN_VIEW_JOB_APPLICATIONS` | No (default `false`) | Lets admins see members' job applications | `true` / `false` | You choose |
 | `WHATSAPP_PROVIDER` | No (default `console`) | `console` writes messages to the logs. `meta` sends them for real | `console` | — |
 | `WHATSAPP_TOKEN` | Only if `meta` | Meta Cloud API access token | `EAAG...` | Meta developer app > WhatsApp > API Setup |

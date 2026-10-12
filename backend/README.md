@@ -100,7 +100,7 @@ When an article is submitted, the row is saved with `grading_status=pending` and
 
 1. fetches the URL, checking every redirect hop against private/internal addresses;
 2. strips boilerplate;
-3. calls Claude (`claude-opus-5`) with the rubric from section 7 of the design doc, and stores the scores, overall feedback,
+3. calls Claude (`claude-opus-5-5` by default) with the rubric from section 7 of the design doc, and stores the scores, overall feedback,
    and up to 3 strengths and 3 improvements (`ai_details`).
 
 Without `ANTHROPIC_API_KEY`, articles are marked `failed` with a readable message (an admin can grade them by hand).

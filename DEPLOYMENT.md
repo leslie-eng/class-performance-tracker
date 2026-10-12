@@ -1,10 +1,73 @@
-# Deployment notes: Friday Drop, quizzes and coding exercises
+# ClassTrack Deployment Guide
 
-These are the operational extras on top of the basic Render setup in [README.md](README.md#4-deploying-on-render).
+## Backend-Frontend Connection
+
+### Development Setup
+
+**Backend runs on port 8000, frontend on port 5173.**
+
+1. Backend:
+   ```bash
+   cd backend
+   cp .env.example .env
+   # Edit .env and set at minimum: DATABASE_URL, JWT_SECRET
+   pip install -r requirements.txt
+   alembic upgrade head
+   uvicorn app.main:app --reload
+   ```
+
+2. Frontend:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+3. The Vite dev server proxies `/api/*` requests to `http://localhost:8000/*` (stripping the `/api` prefix).
+
+### Production Deployment (Render)
+
+The `render.yaml` blueprint deploys both services:
+
+#### Backend (`classtrack-api`)
+- Set these environment variables in Render dashboard:
+  - `CORS_ORIGINS` — **CRITICAL**: Must include your frontend URL, e.g. `https://classtrack-web.onrender.com`
+  - `ADMIN_EMAILS` — Comma-separated emails that become admins on registration
+  - `ANTHROPIC_API_KEY` — Optional, for AI article grading
+  - `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_LAG_TEMPLATE` — Optional, for WhatsApp notifications
+
+#### Frontend (`classtrack-web`)
+- Set this environment variable:
+  - `VITE_API_URL` — **CRITICAL**: The backend's full URL, e.g. `https://classtrack-api.onrender.com` (no trailing slash)
+- **Important**: This is a build-time variable. After changing it, you must trigger a redeploy so Vite rebuilds with the new value.
+
+### CORS Troubleshooting
+
+If frontend requests fail with network errors:
+1. Check browser console for CORS errors
+2. Verify `CORS_ORIGINS` on backend includes the frontend origin (scheme + domain, no trailing slash)
+3. Verify frontend was built with correct `VITE_API_URL`
+4. Check backend logs for the "CORS allowed origins" line on startup
+
+### API URL Validation
+
+The frontend includes runtime checks:
+- If `VITE_API_URL` was unset during build, it defaults to `/api` and logs a warning in production
+- If the API returns HTML instead of JSON, it detects the frontend's `index.html` was served (wrong URL)
+
+### Database
+
+Render provisions a free PostgreSQL database. Migrations run automatically on every backend deploy via the `startCommand`.
+
+For other providers (Neon, Supabase), delete the `databases` section in `render.yaml` and set `DATABASE_URL` manually (the backend accepts `postgres://` and `postgresql://` URLs and converts them to `postgresql+psycopg://`).
+
+## Friday Drop, quizzes and coding exercises
+
+Operational extras on top of the setup above and in [README.md](README.md#4-deploying-on-render).
 Every variable named here is described in the README's
 [environment table](README.md#backend-classtrack-api).
 
-## What happens on deploy
+### What happens on deploy
 
 The API's start command runs `alembic upgrade head`, so the new tables are created on the first deploy. There are
 three migrations: the weekly drop and quizzes, the learning materials, and the coding exercises. Nothing else needs
@@ -13,7 +76,7 @@ running by hand.
 If you deploy with the Blueprint, the new variables are created with it, including a generated `JOB_TOKEN`.
 `TIMEZONE` now defaults to `Africa/Nairobi`. That also moves "today" for streaks and the 20:00 lag check.
 
-## Waking the API for the Friday Drop
+### Waking the API for the Friday Drop
 
 The drop is scheduled for Friday 08:00 in `TIMEZONE`. On Render's free plan the API sleeps after 15 idle minutes,
 and a sleeping process can't fire its own scheduler. Three things make sure the drop still goes out:
@@ -28,7 +91,7 @@ All three paths claim the same `job_runs` row before running, and each member's 
 date. Running the job twice, or all three at once, never sends anyone the drop twice. A member whose send failed is
 retried on the next run.
 
-### Option A: cron-job.org (free, no code)
+#### Option A: cron-job.org (free, no code)
 
 1. Copy `JOB_TOKEN` from the API service's **Environment** tab in Render.
 2. On [cron-job.org](https://cron-job.org), create a cron job:
@@ -42,7 +105,7 @@ retried on the next run.
 
 Pinging only in the Friday window, rather than all week, keeps the free instance asleep the rest of the time.
 
-### Option B: GitHub Actions
+#### Option B: GitHub Actions
 
 Add `JOB_TOKEN` and `API_URL` as repository secrets, then commit `.github/workflows/weekly-drop.yml`:
 
@@ -66,14 +129,14 @@ jobs:
 
 GitHub may start scheduled workflows a few minutes late; that's harmless here.
 
-### Checking it worked
+#### Checking it worked
 
 - **Admin > Friday Drop > Preview next drop** shows the exact one-line WhatsApp text and who would get it.
 - After 08:00 on a Friday, **Admin > WhatsApp nudges > Recent notifications** lists one `weekly_drop` row per
   opted-in member.
 - With `WHATSAPP_PROVIDER=console`, which is the default, messages only go to the API logs as `[whatsapp -> …]`.
 
-## WhatsApp templates
+### WhatsApp templates
 
 Messages a business starts need an approved Meta template. Template parameters can't contain newlines, tabs or more
 than four spaces in a row, so the drop is sent as a single line: a two-sentence summary, the project titles, and a
@@ -92,7 +155,7 @@ Admin alerts use the same template. These go to admins with a phone number when 
 or when a quiz couldn't be generated. Only members with a phone number and WhatsApp opt-in get the drop; everyone
 else sees it on `/weekly`.
 
-## Quizzes and learning materials
+### Quizzes and learning materials
 
 - **Without notes there is nothing to send.** If nobody pastes class notes (`/weekly` or Admin > Friday Drop) for the
   coming Friday, the drop goes out without a summary or weekly quiz, and admins get a reminder. Nothing is
@@ -106,7 +169,7 @@ else sees it on `/weekly`.
   quizzes and three interview quizzes per specialization in use. Point `QUIZ_MODEL` at a cheaper Claude model to cut
   generation cost; grading keeps using `GRADING_MODEL`.
 
-## Coding exercises: where code runs
+### Coding exercises: where code runs
 
 Member code never runs on the API host. The default `CODE_RUNNER=none` runs it in the member's browser: Python
 through [Pyodide](https://pyodide.org) (loaded from jsDelivr, pinned in `frontend/src/lib/runner/pyodide.worker.ts`)
