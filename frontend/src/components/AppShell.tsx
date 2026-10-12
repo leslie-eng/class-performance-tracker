@@ -8,6 +8,8 @@ const NAV = [
   { to: '/', label: 'Dashboard', end: true },
   { to: '/submit', label: 'Submit Task' },
   { to: '/leaderboard', label: 'Leaderboard' },
+  { to: '/weekly', label: 'Friday Drop' },
+  { to: '/code', label: 'Code' },
   { to: '/grading', label: 'AI Grading' },
   { to: '/jobs', label: 'Job Tracker' },
 ]
@@ -94,6 +96,11 @@ function UserMenu() {
           {user.is_admin && (
             <Link to="/admin" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-surface-container-low">
               <Icon name="admin_panel_settings" className="text-[18px]" /> Admin
+            </Link>
+          )}
+          {user.is_admin && (
+            <Link to="/admin/materials" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-surface-container-low">
+              <Icon name="library_books" className="text-[18px]" /> Learning materials
             </Link>
           )}
           <button onClick={signOut} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-error hover:bg-error-container/40">

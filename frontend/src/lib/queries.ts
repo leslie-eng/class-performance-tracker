@@ -2,14 +2,20 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
 import type {
   Challenge,
+  CodeAttempt,
+  ExerciseDetail,
+  ExerciseSummary,
   Dashboard,
   FeedItem,
   JobApplication,
   JobStats,
   LeaderboardRow,
   Meta,
+  QuizAttempt,
+  QuizLeaderRow,
   Submission,
   User,
+  WeeklyCurrent,
 } from './types'
 
 export const keys = {
@@ -23,6 +29,12 @@ export const keys = {
   dashboard: (userId: number, challengeId?: number) => ['dashboard', userId, challengeId ?? 'all'] as const,
   jobs: ['jobs'] as const,
   feed: ['jobs', 'feed'] as const,
+  weekly: ['weekly'] as const,
+  attempt: (id: number) => ['quiz-attempt', id] as const,
+  quizLeaderboard: ['quiz-leaderboard'] as const,
+  exercises: ['exercises'] as const,
+  exercise: (id: number) => ['exercises', id] as const,
+  codeAttempt: (id: number) => ['code-attempt', id] as const,
 }
 
 export const useMe = (enabled = true) =>
@@ -92,3 +104,32 @@ export function useEnroll() {
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.challenges }),
   })
 }
+
+export const useWeekly = () =>
+  useQuery({ queryKey: keys.weekly, queryFn: () => api<WeeklyCurrent>('/weekly/current') })
+
+export const useQuizAttempt = (id: number | undefined) =>
+  useQuery({
+    queryKey: keys.attempt(id ?? 0),
+    queryFn: () => api<QuizAttempt>(`/quizzes/attempts/${id}`),
+    enabled: !!id,
+    staleTime: Infinity, // the runner owns this state while the attempt is open
+  })
+
+export const useQuizLeaderboard = () =>
+  useQuery({ queryKey: keys.quizLeaderboard, queryFn: () => api<QuizLeaderRow[]>('/quizzes/leaderboard') })
+
+export const useExercises = () =>
+  useQuery({ queryKey: keys.exercises, queryFn: () => api<ExerciseSummary[]>('/coding/exercises') })
+
+export const useExercise = (id: number) =>
+  useQuery({ queryKey: keys.exercise(id), queryFn: () => api<ExerciseDetail>(`/coding/exercises/${id}`), staleTime: Infinity })
+
+/** Polls while AI feedback is pending. */
+export const useCodeAttempt = (id: number | undefined) =>
+  useQuery({
+    queryKey: keys.codeAttempt(id ?? 0),
+    queryFn: () => api<CodeAttempt>(`/coding/attempts/${id}`),
+    enabled: !!id,
+    refetchInterval: (q) => (q.state.data?.grading_status === 'pending' ? 3000 : false),
+  })
