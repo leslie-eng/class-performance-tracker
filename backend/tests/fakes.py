@@ -1,4 +1,4 @@
-"""Test doubles for Claude (grading._parse) and WhatsApp, so tests make no network calls."""
+"""Test doubles for the AI layer (grading._parse) and WhatsApp, so tests make no network calls."""
 
 import re
 
@@ -32,11 +32,13 @@ class FakeClaude:
 
     def __init__(self):
         self.calls: list[tuple[str, str]] = []  # (output model name, user content)
+        self.tasks: list[str] = []
         self.quiz_responses: list[GenQuiz] = []
         self.short_score = 1.0
 
-    def __call__(self, system, content, output_format, model=None):
+    def __call__(self, system, content, output_format, task="grading"):
         self.calls.append((output_format.__name__, content))
+        self.tasks.append(task)
         if output_format is BriefSummary:
             return BriefSummary(
                 summary="Decorators wrap functions to add behaviour. Generators yield values lazily. Also: context managers.",

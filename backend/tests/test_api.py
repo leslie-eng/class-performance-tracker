@@ -244,7 +244,7 @@ def test_leave_challenge_deletes_submissions(client, challenge, db):
 def test_grading_without_api_key_fails_cleanly(client, challenge, monkeypatch):
     from app.config import get_settings
 
-    monkeypatch.setattr(get_settings(), "anthropic_api_key", None)
+    monkeypatch.setattr(get_settings(), "openrouter_api_key", None)
     h = member(client, challenge)
     sub = client.post(
         "/submissions",

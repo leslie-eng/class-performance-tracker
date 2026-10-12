@@ -202,6 +202,7 @@ class Submission(Base):
     ai_breakdown: Mapped[dict | None] = mapped_column(JSON)
     ai_feedback: Mapped[str | None] = mapped_column(Text)
     ai_details: Mapped[dict | None] = mapped_column(JSON)  # article title, strengths, improvements
+    ai_model: Mapped[str | None] = mapped_column(String(120))  # OpenRouter model that wrote the AI feedback
     grade_overridden: Mapped[bool] = mapped_column(Boolean, default=False)
 
     points_awarded: Mapped[int] = mapped_column(Integer, default=0)
@@ -280,6 +281,7 @@ class WeeklyBrief(Base):
     summary: Mapped[str | None] = mapped_column(Text)
     concepts: Mapped[list] = mapped_column(JSON, default=list)  # [{title, one_liner}]
     summary_error: Mapped[str | None] = mapped_column(Text)
+    ai_model: Mapped[str | None] = mapped_column(String(120))  # OpenRouter model that wrote the summary
     status: Mapped[BriefStatus] = mapped_column(str_enum(BriefStatus), default=BriefStatus.draft)
     created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -328,6 +330,7 @@ class Quiz(Base):
     status: Mapped[QuizStatus] = mapped_column(str_enum(QuizStatus), default=QuizStatus.generating)
     error: Mapped[str | None] = mapped_column(Text)
     source_material_ids: Mapped[list] = mapped_column(JSON, default=list)
+    ai_model: Mapped[str | None] = mapped_column(String(120))  # OpenRouter model that generated the questions
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
 
@@ -350,6 +353,7 @@ class QuizAttempt(Base):
         str_enum(GradingStatus), default=GradingStatus.not_applicable
     )
     grading_error: Mapped[str | None] = mapped_column(Text)
+    ai_model: Mapped[str | None] = mapped_column(String(120))  # OpenRouter model that graded the short answers
     points_awarded: Mapped[int] = mapped_column(Integer, default=0)
 
     quiz: Mapped[Quiz] = relationship()
@@ -377,7 +381,7 @@ class JobRun(Base):
 
 class LearningMaterial(Base):
     """Admin-curated course material. Only extracted text is stored (no files: Render's
-    disk is ephemeral). Contents are untrusted when sent to Claude; log ids, never text."""
+    disk is ephemeral). Contents are untrusted when sent to the AI; log ids, never text."""
 
     __tablename__ = "learning_materials"
 
@@ -387,8 +391,9 @@ class LearningMaterial(Base):
     content_text: Mapped[str] = mapped_column(Text)
     source_url: Mapped[str | None] = mapped_column(String(1000))
     original_filename: Mapped[str | None] = mapped_column(String(255))
-    digest: Mapped[str | None] = mapped_column(Text)  # Claude summary + key terms, made once at ingest
+    digest: Mapped[str | None] = mapped_column(Text)  # AI summary + key terms, made once at ingest
     digest_error: Mapped[str | None] = mapped_column(Text)
+    ai_model: Mapped[str | None] = mapped_column(String(120))  # OpenRouter model that wrote the digest
     module: Mapped[str] = mapped_column(String(120), default="", index=True)
     week_key: Mapped[date | None] = mapped_column(Date, index=True)
     specialization: Mapped[str | None] = mapped_column(String(40))
@@ -424,6 +429,7 @@ class CodingExercise(Base):
     status: Mapped[ExerciseStatus] = mapped_column(str_enum(ExerciseStatus), default=ExerciseStatus.draft)
     reference_solution: Mapped[str | None] = mapped_column(Text)  # admin only
     tests_verified: Mapped[bool] = mapped_column(Boolean, default=False)  # reference passes every test
+    ai_model: Mapped[str | None] = mapped_column(String(120))  # OpenRouter model that generated the draft
     created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
@@ -456,7 +462,42 @@ class CodeAttempt(Base):
     runner_error: Mapped[str | None] = mapped_column(Text)
     grading_status: Mapped[GradingStatus] = mapped_column(str_enum(GradingStatus), default=GradingStatus.pending)
     ai_feedback: Mapped[str | None] = mapped_column(Text)
+    ai_model: Mapped[str | None] = mapped_column(String(120))  # OpenRouter model that wrote the AI feedback
     points_awarded: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     exercise: Mapped[CodingExercise] = relationship()
+
+
+class LLMTaskModel(Base):
+    """Admin's choice of model for one AI task (app/llm). Overrides LLM_TASK_MODELS and
+    LLM_DEFAULT_MODEL; deleting the row goes back to them."""
+
+    __tablename__ = "llm_task_models"
+
+    task: Mapped[str] = mapped_column(String(20), primary_key=True)
+    model: Mapped[str] = mapped_column(String(120))  # OpenRouter id
+    updated_by: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+
+class LLMCall(Base):
+    """One AI request (app/llm), for usage and cost per model. Counts and timings only:
+    never prompts, outputs or which member it was for."""
+
+    __tablename__ = "llm_calls"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, index=True)
+    task: Mapped[str] = mapped_column(String(20))
+    model_requested: Mapped[str | None] = mapped_column(String(120))  # first model in the chain
+    model_used: Mapped[str | None] = mapped_column(String(120))  # null when the call failed
+    fallback_used: Mapped[bool] = mapped_column(Boolean, default=False)
+    tokens_in: Mapped[int] = mapped_column(Integer, default=0)
+    tokens_out: Mapped[int] = mapped_column(Integer, default=0)
+    latency_ms: Mapped[int] = mapped_column(Integer, default=0)  # whole call, retries included
+    cost: Mapped[float | None] = mapped_column(Float)  # USD
+    cost_estimated: Mapped[bool] = mapped_column(Boolean, default=False)  # from registry prices
+    ok: Mapped[bool] = mapped_column(Boolean, default=True)
+    error_type: Mapped[str | None] = mapped_column(String(40))  # e.g. LLMUnavailable
+    http_status: Mapped[int | None] = mapped_column(Integer)

@@ -8,8 +8,10 @@ from fastapi.responses import JSONResponse
 
 from app.config import get_settings
 from app.deps import today
+from app.llm import registry
 from app.routers import (
     admin,
+    admin_llm,
     admin_quizzes,
     admin_weekly,
     auth,
@@ -25,6 +27,7 @@ from app.routers import (
     weekly,
 )
 from app.scheduler import build_scheduler
+from app.startup_checks import run_startup_checks
 from app.services.materials import MAX_UPLOAD_BYTES
 from app.services.weekly import maybe_run_weekly_drop
 
@@ -33,6 +36,7 @@ logging.basicConfig(level=logging.INFO)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    run_startup_checks()  # raises on a bad config, so the deploy fails with the reason in the logs
     scheduler = build_scheduler() if get_settings().scheduler_enabled else None
     if scheduler:
         scheduler.start()
@@ -74,7 +78,7 @@ app.add_middleware(
 
 for r in (
     auth, challenges, submissions, leaderboard, members, job_applications, admin,
-    weekly, quizzes, admin_weekly, internal, materials, admin_quizzes, coding,
+    weekly, quizzes, admin_weekly, internal, materials, admin_quizzes, coding, admin_llm,
 ):
     app.include_router(r.router)
 
@@ -87,4 +91,10 @@ def health():
 @app.get("/meta", tags=["meta"])
 def meta():
     """Server timezone and date, so clients count down to the same midnight the backend uses."""
-    return {"timezone": settings.timezone, "today": today(), "specializations": settings.specialization_list}
+    return {
+        "timezone": settings.timezone,
+        "today": today(),
+        "specializations": settings.specialization_list,
+        # For the "AI · <model>" label on AI outputs.
+        "ai_model_labels": {m.id: m.label for m in registry.MODELS.values()},
+    }

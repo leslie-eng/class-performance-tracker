@@ -138,7 +138,7 @@ def test_no_notes_means_no_weekly_quiz(client, claude):
 
 
 def test_without_api_key_everything_loads(client, notes, monkeypatch):
-    monkeypatch.setattr(get_settings(), "anthropic_api_key", None)
+    monkeypatch.setattr(get_settings(), "openrouter_api_key", None)
     h, _ = register(client, "k@example.com")
     current = client.get("/weekly/current", headers=h)
     assert current.status_code == 200 and current.json()["ai_configured"] is False
@@ -151,7 +151,7 @@ def test_short_answer_grading_failure_keeps_mcq_points(client, claude, notes, mo
     mcq = next(q for q in attempt["questions"] if q["type"] == "mcq")
     short = next(q for q in attempt["questions"] if q["type"] == "short")
 
-    def broken(system, content, output_format, model=None):
+    def broken(system, content, output_format, task="grading"):
         raise grading.GradingError("grader down")
 
     monkeypatch.setattr(grading, "_parse", broken)

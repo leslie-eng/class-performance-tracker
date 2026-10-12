@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
 from app.deps import DB, AdminUser
+from app.llm.ratelimit import Quota
 from app.models import JobRun, WeeklyBrief
 from app.routers.weekly import brief_out
 from app.schemas_weekly import BriefOut
@@ -44,11 +45,12 @@ def trigger_monthly(db: DB, _: AdminUser, dry_run: bool = True):
 
 
 @router.post("/weekly/brief/{brief_id}/regenerate", response_model=BriefOut)
-def regenerate_summary(brief_id: int, db: DB, _: AdminUser):
+def regenerate_summary(brief_id: int, db: DB, _: AdminUser, quota: Quota):
     brief = db.get(WeeklyBrief, brief_id)
     if brief is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Brief not found")
     if not brief.source_notes.strip():
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "This brief has no notes to summarise")
+    quota.take()
     summarize_brief(db, brief)
     return brief_out(brief)
