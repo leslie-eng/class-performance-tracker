@@ -5,7 +5,7 @@ import { QuizReview } from '../components/admin/QuizReview'
 import { ErrorBanner, Icon } from '../components/ui'
 import { api } from '../lib/api'
 import { shortDate } from '../lib/dates'
-import { useSession } from '../lib/session'
+import { useSession } from '../lib/session-context'
 import type { AdminQuiz, Material, QuizKind } from '../lib/types'
 
 type Tab = 'materials' | 'quizzes' | 'exercises'

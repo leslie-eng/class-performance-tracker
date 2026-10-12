@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useLeaderboard } from '../lib/queries'
-import { useSession } from '../lib/session'
+import { useSession } from '../lib/session-context'
 import { Avatar, Icon, Logo, StreakPill, Wordmark } from './ui'
 
 const NAV = [

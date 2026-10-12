@@ -1,25 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { getToken, setToken, setUnauthorizedHandler } from './api'
 import { useMe, useMeta, useMyChallenges } from './queries'
-import type { Challenge, Meta, User } from './types'
+import { SessionContext, type Session } from './session-context'
 
 const CHALLENGE_KEY = 'classtrack.challenge'
-
-interface Session {
-  token: string | null
-  user: User | undefined
-  userLoading: boolean
-  meta: Meta | undefined
-  challenges: Challenge[]
-  challengesLoading: boolean
-  challenge: Challenge | undefined
-  selectChallenge: (id: number) => void
-  signIn: (token: string, remember: boolean) => void
-  signOut: () => void
-}
-
-const SessionContext = createContext<Session | null>(null)
 
 function readSelected(): number | null {
   try {
@@ -85,10 +70,4 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     signOut,
   }
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
-}
-
-export function useSession(): Session {
-  const ctx = useContext(SessionContext)
-  if (!ctx) throw new Error('useSession must be used inside SessionProvider')
-  return ctx
 }

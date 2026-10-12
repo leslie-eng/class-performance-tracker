@@ -3,7 +3,7 @@ import { useState, type FormEvent } from 'react'
 import { ErrorBanner, Icon, PageLoader } from '../components/ui'
 import { api } from '../lib/api'
 import { keys } from '../lib/queries'
-import { useSession } from '../lib/session'
+import { useSession } from '../lib/session-context'
 import type { User } from '../lib/types'
 
 export default function SettingsPage() {

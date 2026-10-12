@@ -6,7 +6,7 @@ import { EmptyState, ErrorBanner, Icon, Modal, PageLoader } from '../components/
 import { api } from '../lib/api'
 import { shortDate } from '../lib/dates'
 import { keys, useQuizLeaderboard, useWeekly } from '../lib/queries'
-import { useSession } from '../lib/session'
+import { useSession } from '../lib/session-context'
 import type { Proposal, QuizAttempt, QuizKind, QuizSlot, WeeklyCurrent } from '../lib/types'
 
 const KIND_LABEL: Record<QuizKind, string> = {
