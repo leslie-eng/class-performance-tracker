@@ -271,3 +271,9 @@ UPDATE users SET is_admin = true WHERE email = 'you@example.com';
 
 `python -m scripts.seed_demo` (run from `backend/`) creates a demo cohort with the admin login
 `demo@classtrack.dev` / `password123`. It only runs on an empty database and is for demos, not production.
+
+---
+
+## 7. Contributing
+
+Branch naming, quality gates, migration rules and the PR checklist are in [CONTRIBUTING.md](CONTRIBUTING.md).
