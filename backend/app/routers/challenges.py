@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
 from app.deps import DB, AdminUser, CurrentUser, today
-from app.models import Challenge, Enrollment
+from app.models import Challenge, ChallengeStatus, Enrollment, utcnow
 from app.schemas import ChallengeIn, ChallengeOut, ChallengeUpdate, EnrollmentOut, UserOut
 from app.scoring import recompute_enrollment
 
@@ -19,8 +19,13 @@ def get_challenge_or_404(db: DB, challenge_id: int) -> Challenge:
 
 
 @router.post("", response_model=ChallengeOut, status_code=status.HTTP_201_CREATED)
-def create_challenge(body: ChallengeIn, db: DB, _: AdminUser):
-    challenge = Challenge(**body.model_dump(exclude={"scoring_rules"}), scoring_rules=body.scoring_rules.overrides())
+def create_challenge(body: ChallengeIn, db: DB, admin: AdminUser):
+    """Admin-created challenges skip the queue: approved at once, with the admin as reviewer."""
+    challenge = Challenge(
+        **body.model_dump(exclude={"scoring_rules"}), scoring_rules=body.scoring_rules.overrides(),
+        status=ChallengeStatus.approved, created_by=admin.id, reviewed_by=admin.id, reviewed_at=utcnow(),
+        review_note="Created by an admin",
+    )
     db.add(challenge)
     db.commit()
     return challenge

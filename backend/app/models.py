@@ -41,6 +41,16 @@ class TaskTypes(str, enum.Enum):
     both = "both"
 
 
+class ChallengeStatus(str, enum.Enum):
+    """Members propose challenges (pending); only approved ones are visible to everyone and
+    open for enrolment. Allowed moves live in app/services/challenge_review.py."""
+
+    pending = "pending"
+    approved = "approved"
+    rejected = "rejected"
+    cancelled = "cancelled"  # withdrawn by the member who proposed it
+
+
 class SubmissionType(str, enum.Enum):
     code = "code"
     article = "article"
@@ -148,9 +158,22 @@ class Challenge(Base):
     task_types_allowed: Mapped[TaskTypes] = mapped_column(str_enum(TaskTypes), default=TaskTypes.both)
     # Overrides on top of scoring.DEFAULT_RULES; see app/scoring.py.
     scoring_rules: Mapped[dict] = mapped_column(JSON, default=dict)
+    # The app defaults to pending so nothing becomes visible by accident (admin-created ones are set to
+    # approved). The DB default is "approved" for rows inserted by older code during a deploy.
+    status: Mapped[ChallengeStatus] = mapped_column(
+        str_enum(ChallengeStatus), default=ChallengeStatus.pending, server_default="approved", index=True
+    )
+    created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))  # null: before approvals
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+    # Audit trail of the review: who approved/rejected, when and why (required on rejection).
+    reviewed_by: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    review_note: Mapped[str | None] = mapped_column(Text)
 
     enrollments: Mapped[list["Enrollment"]] = relationship(back_populates="challenge", cascade="all, delete-orphan", passive_deletes=True)
+    creator: Mapped["User | None"] = relationship(foreign_keys=[created_by])
+    reviewer: Mapped["User | None"] = relationship(foreign_keys=[reviewed_by])
 
     @property
     def total_days(self) -> int:
@@ -501,3 +524,22 @@ class LLMCall(Base):
     ok: Mapped[bool] = mapped_column(Boolean, default=True)
     error_type: Mapped[str | None] = mapped_column(String(40))  # e.g. LLMUnavailable
     http_status: Mapped[int | None] = mapped_column(Integer)
+
+
+class InboxMessage(Base):
+    """In-app notifications (the bell in the top bar). Written by app/services/inbox.notify();
+    the `notifications` table is the separate WhatsApp send log. Text never includes grades
+    or other members' data."""
+
+    __tablename__ = "inbox_messages"
+    __table_args__ = (Index("ix_inbox_messages_user_read", "user_id", "read_at"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    event: Mapped[str] = mapped_column(String(40))  # e.g. challenge_submitted, challenge_approved
+    title: Mapped[str] = mapped_column(String(200))
+    body: Mapped[str] = mapped_column(Text, default="")
+    link: Mapped[str | None] = mapped_column(String(300))  # in-app path, e.g. /challenges/proposals
+    challenge_id: Mapped[int | None] = mapped_column(ForeignKey("challenges.id", ondelete="SET NULL"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
