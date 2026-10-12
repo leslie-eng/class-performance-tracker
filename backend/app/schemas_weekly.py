@@ -19,6 +19,7 @@ class BriefOut(BaseModel):
     summary_error: str | None
     has_notes: bool
     updated_at: datetime
+    ai_model: str | None = None  # OpenRouter id of the model that produced the AI output
     source_notes: str | None = None  # only on GET /weekly/brief (the notes form)
 
 
@@ -102,6 +103,7 @@ class AttemptOut(BaseModel):
     grading_status: str
     grading_error: str | None = None
     results: list[dict] | None = None
+    ai_model: str | None = None  # OpenRouter id of the model that produced the AI output
 
 
 class QuizLeaderRow(BaseModel):

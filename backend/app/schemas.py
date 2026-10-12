@@ -162,6 +162,7 @@ class SubmissionOut(ORM):
     ai_breakdown: dict | None
     ai_feedback: str | None
     ai_details: dict | None
+    ai_model: str | None = None  # OpenRouter id of the model that produced the AI output
     grade_overridden: bool
     points_awarded: int
     submitted_at: datetime

@@ -1,7 +1,7 @@
 """Admin learning materials: ingest, digests, and compact context for quiz prompts.
 
 Only extracted text is stored, never the uploaded file. Each material gets a short
-Claude-written digest once at ingest; quiz prompts then carry the digests plus the
+AI-written digest once at ingest; quiz prompts then carry the digests plus the
 few heading-chunks most relevant to the topic, not whole documents. Material text
 is untrusted: it's wrapped in <material> tags in prompts, and only ids are logged.
 """
@@ -14,14 +14,13 @@ import re
 from collections import Counter
 from datetime import date
 
-import anthropic
 from pydantic import BaseModel
 from pypdf import PdfReader
 from pypdf.errors import PdfReadError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.config import get_settings
+from app import llm
 from app.db import SessionLocal
 from app.models import LearningMaterial, MaterialStatus, QuizKind, WeeklyBrief
 from app.services import grading
@@ -158,7 +157,7 @@ def make_digest(material: LearningMaterial) -> str:
         DIGEST_SYSTEM,
         f"<material id={material.id} title={material.title!r}>\n{text}\n</material>",
         Digest,
-        model=get_settings().quiz_model_name,
+        task="summary",
     )
     return f"{out.summary.strip()}\nKey terms: {', '.join(t.strip() for t in out.key_terms[:15])}"
 
@@ -169,16 +168,14 @@ def digest_job(material_id: int) -> None:
         material = db.get(LearningMaterial, material_id)
         if material is None:
             return
-        if not get_settings().anthropic_api_key:
+        if not llm.ai_configured():
             material.digest_error = "AI digests aren't configured on this server yet"
         else:
             try:
                 material.digest, material.digest_error = make_digest(material), None
+                material.ai_model = grading.take_last_model()
             except grading.GradingError as e:
-                material.digest_error = str(e)
-            except anthropic.APIError as e:
-                log.warning("Claude API error digesting material %s: %s", material_id, type(e).__name__)
-                material.digest_error = f"Digest service error ({type(e).__name__}); edit or refetch to retry"
+                material.digest_error = f"{e}; edit or refetch to retry"
         db.commit()
         log.info("Digest for material %s: %s", material_id, "ok" if material.digest else "failed")
 

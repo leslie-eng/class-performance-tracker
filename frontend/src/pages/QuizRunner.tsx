@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ErrorBanner, Icon, PageLoader, ProgressBar, ScoreRing } from '../components/ui'
+import { AiModelBadge } from '../components/AiModelBadge'
 import { api, ApiError } from '../lib/api'
 import { formatCountdown } from '../lib/dates'
 import { keys, useQuizAttempt } from '../lib/queries'
@@ -224,6 +225,7 @@ function Results({ a }: { a: QuizAttempt }) {
         <p className="label">{TITLE[a.kind]} · {a.duration_minutes} min</p>
         <ScoreRing value={score} max={a.max_score || 1} label={score} sub={`/ ${a.max_score}`} color={pct >= 0.7 ? '#15803d' : pct >= 0.4 ? '#2563eb' : '#d97706'} />
         <p className="text-body-md text-on-surface-variant">{a.points_awarded} quiz points earned</p>
+        {a.grading_status === 'done' && <AiModelBadge model={a.ai_model} />}
         {a.late && (
           <p className="rounded-lg bg-tertiary-fixed px-3 py-2 text-body-sm text-tertiary">
             Time ran out before your submit arrived, so your last saved answers were graded.

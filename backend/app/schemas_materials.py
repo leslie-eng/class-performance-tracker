@@ -59,6 +59,7 @@ class MaterialSummary(BaseModel):
     digest_ready: bool
     digest_error: str | None
     created_at: datetime
+    ai_model: str | None = None  # OpenRouter id of the model that produced the AI output
 
 
 class MaterialOut(MaterialSummary):
@@ -124,6 +125,7 @@ class AdminQuizSummary(BaseModel):
     attempts: int
     sources: list[SourceRef]
     created_at: datetime
+    ai_model: str | None = None  # OpenRouter id of the model that produced the AI output
 
 
 class AdminQuizOut(AdminQuizSummary):

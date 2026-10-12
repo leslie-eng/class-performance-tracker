@@ -31,9 +31,12 @@ app/
   schemas.py         request/response models
   scoring.py         point model, streaks, recompute_enrollment()
   scheduler.py       APScheduler: nightly lag check, weekly digest
+  startup_checks.py  config validation + OpenRouter key check; a bad config stops the boot
+  llm/               OpenRouter client: model registry, generate() with fallbacks/retries/JSON
+                     validation, anonymisation, per-user AI rate limit, admin model choice, usage log
   routers/           auth, challenges, submissions, leaderboard, members, job_applications, admin
   services/
-    grading.py       Claude API article grading + optional code review
+    grading.py       article grading + code review; _parse() is the single entry point to app/llm
     article_fetch.py URL fetch + boilerplate stripping (blocks private IPs)
     notifications.py lag detection, nudge messages, admin digest
     whatsapp.py      console sender (dev) / Meta Cloud API sender
@@ -72,6 +75,10 @@ alembic/             migrations
 | PATCH | `/admin/submissions/{id}/grade` | admin | Override an AI score |
 | POST | `/admin/recompute` | admin | Rebuild all cached stats |
 | PATCH | `/admin/members/{id}/role?is_admin=` | admin | Grant/revoke admin |
+| GET | `/admin/llm` | admin | AI models: per-task model and where it comes from, fallbacks, the registry |
+| PUT | `/admin/llm/tasks/{task}` | admin | Set a task's model live (`{"model": "mistral-small"}`; `null` = back to env) |
+| POST | `/admin/llm/test` | admin | Send a sample prompt to one model: reply, latency, tokens, cost |
+| GET | `/admin/llm/usage?days=30` | admin | Calls, errors, fallbacks, tokens, cost and latency per model and task |
 | GET | `/meta` | anyone | Server timezone and today's date (for the deadline countdown) |
 
 ## Scoring
@@ -100,12 +107,22 @@ When an article is submitted, the row is saved with `grading_status=pending` and
 
 1. fetches the URL, checking every redirect hop against private/internal addresses;
 2. strips boilerplate;
-3. calls Claude (`claude-opus-5-5` by default) with the rubric from section 7 of the design doc, and stores the scores, overall feedback,
-   and up to 3 strengths and 3 improvements (`ai_details`).
+3. sends it, with the rubric from section 7 of the design doc, to the `grading` task's model through OpenRouter, and
+   stores the scores, overall feedback, up to 3 strengths and 3 improvements (`ai_details`), and the model used (`ai_model`).
 
-Without `ANTHROPIC_API_KEY`, articles are marked `failed` with a readable message (an admin can grade them by hand).
+Without `OPENROUTER_API_KEY`, articles are marked `failed` with a readable message (an admin can grade them by hand).
 
-The call uses structured output (`messages.parse` with a Pydantic model) and server-side refusal fallbacks (`fallbacks="default"`). Article text is treated as untrusted input, so instructions inside an article are ignored. The frontend should poll `GET /submissions/{id}`. Pages that need a login or render with JavaScript fail with a readable message; an admin can then set the grade by hand.
+How every AI call works (`app/llm/service.py`):
+- **Models:** the task's model (admin choice > `LLM_TASK_MODELS` > `LLM_DEFAULT_MODEL`), then `LLM_FALLBACK_MODELS`,
+  sent as OpenRouter's `models` list. Retries with backoff only on 408/429/5xx and timeouts; other 4xx fail at once
+  with a readable message.
+- **Output:** a JSON schema from the Pydantic model; the reply is validated, and an invalid one is retried once.
+- **Privacy:** requests ask for zero-data-retention providers that don't collect data (`LLM_REQUIRE_ZDR`), and
+  members' names, emails and phone numbers are replaced with placeholders first (`LLM_ANONYMIZE`).
+- **Limits and logging:** 30 AI calls per member per hour (`AI_RATE_LIMIT_PER_HOUR`); one `llm_calls` row per call
+  with tokens, cost and latency, never the content.
+
+Article text is treated as untrusted input, so instructions inside an article are ignored. The frontend should poll `GET /submissions/{id}`. Pages that need a login or render with JavaScript fail with a readable message; an admin can then set the grade by hand.
 
 Background tasks run in the API process. If grading volume grows, move `grade_submission` to a Celery/RQ worker. It already opens its own DB session.
 

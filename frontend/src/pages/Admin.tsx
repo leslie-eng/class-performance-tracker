@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
 import { ClassNotesForm } from '../components/ClassNotesForm'
+import { AIModels } from '../components/admin/AIModels'
 import { Avatar, ErrorBanner, Icon } from '../components/ui'
 import { api } from '../lib/api'
 import { addDays } from '../lib/dates'
@@ -23,7 +24,7 @@ export default function AdminPage() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-headline-lg text-ink md:text-[28px]">Admin</h1>
-        <p className="text-body-md text-on-surface-variant">Manage challenges, members, the Friday Drop and WhatsApp nudges.</p>
+        <p className="text-body-md text-on-surface-variant">Manage challenges, members, the Friday Drop, WhatsApp nudges and AI models.</p>
       </div>
       <div className="grid gap-6 xl:grid-cols-2">
         <CreateChallenge />
@@ -31,6 +32,7 @@ export default function AdminPage() {
         <FridayDrop />
         <Nudges />
         <Members />
+        <AIModels />
       </div>
     </div>
   )

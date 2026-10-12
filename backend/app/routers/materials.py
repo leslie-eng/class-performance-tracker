@@ -8,6 +8,7 @@ from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, Query
 from sqlalchemy import select
 
 from app.deps import DB, AdminUser
+from app.llm.ratelimit import AIQuota, Quota
 from app.models import LearningMaterial, MaterialKind, MaterialStatus, Quiz, User, as_utc
 from app.schemas_materials import MaterialIn, MaterialOut, MaterialSummary, MaterialUpdate, _known_specialization
 from app.services import materials as svc
@@ -23,6 +24,7 @@ def summary(m: LearningMaterial) -> MaterialSummary:
         id=m.id, title=m.title, kind=m.kind.value, module=m.module, week_key=m.week_key, specialization=m.specialization,
         status=m.status.value, source_url=m.source_url, original_filename=m.original_filename, char_count=m.char_count,
         digest_ready=m.digest is not None, digest_error=m.digest_error, created_at=as_utc(m.created_at),
+        ai_model=m.ai_model,
     )
 
 
@@ -56,18 +58,22 @@ def set_text(db: DB, m: LearningMaterial, text: str) -> None:
     m.digest, m.digest_error = None, None
 
 
-def create(db: DB, background: BackgroundTasks, admin: User, m: LearningMaterial, text: str) -> MaterialOut:
+def create(db: DB, background: BackgroundTasks, admin: User, m: LearningMaterial, text: str, quota: AIQuota) -> MaterialOut:
     set_text(db, m, text)
     m.uploaded_by = admin.id
+    ai_now = quota.allow()
+    if not ai_now:
+        m.digest_error = f"{quota.message} Refetch or edit the text to retry."
     db.add(m)
     db.commit()
-    background.add_task(svc.digest_job, m.id)
+    if ai_now:
+        background.add_task(svc.digest_job, m.id)
     log.info("Material %s added by admin %s (%s, %d chars)", m.id, admin.id, m.kind.value, m.char_count)
     return detail(db, m)
 
 
 @router.post("", response_model=MaterialOut, status_code=status.HTTP_201_CREATED)
-def add_material(body: MaterialIn, db: DB, admin: AdminUser, background: BackgroundTasks):
+def add_material(body: MaterialIn, db: DB, admin: AdminUser, background: BackgroundTasks, quota: Quota):
     """Paste text, or give a URL to fetch (same limits and SSRF checks as article grading)."""
     m = LearningMaterial(
         title=body.title.strip(), kind=MaterialKind(body.kind), module=body.module.strip(),
@@ -80,7 +86,7 @@ def add_material(body: MaterialIn, db: DB, admin: AdminUser, background: Backgro
         except ArticleFetchError as e:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(e))
         m.source_url = str(body.url)
-    return create(db, background, admin, m, text)
+    return create(db, background, admin, m, text, quota)
 
 
 @router.post("/upload", response_model=MaterialOut, status_code=status.HTTP_201_CREATED)
@@ -88,6 +94,7 @@ async def upload_material(
     db: DB,
     admin: AdminUser,
     background: BackgroundTasks,
+    quota: Quota,
     file: Annotated[UploadFile, File()],
     title: Annotated[str | None, Form(max_length=200)] = None,
     module: Annotated[str, Form(max_length=120)] = "",
@@ -109,7 +116,7 @@ async def upload_material(
         title=(title or filename).strip()[:200], kind=MaterialKind.file, original_filename=filename,
         module=module.strip(), week_key=week_key, specialization=specialization,
     )
-    return create(db, background, admin, m, text)
+    return create(db, background, admin, m, text, quota)
 
 
 @router.get("", response_model=list[MaterialSummary])
@@ -139,7 +146,7 @@ def get_one(material_id: int, db: DB, _: AdminUser):
 
 
 @router.patch("/{material_id}", response_model=MaterialOut)
-def update_material(material_id: int, body: MaterialUpdate, db: DB, _: AdminUser, background: BackgroundTasks):
+def update_material(material_id: int, body: MaterialUpdate, db: DB, _: AdminUser, background: BackgroundTasks, quota: Quota):
     m = get_material(db, material_id)
     fields = body.model_dump(exclude_unset=True)
     text = fields.pop("content_text", None)
@@ -147,10 +154,13 @@ def update_material(material_id: int, body: MaterialUpdate, db: DB, _: AdminUser
         fields["status"] = MaterialStatus(fields["status"])
     for name, value in fields.items():
         setattr(m, name, value.strip() if isinstance(value, str) and name in ("title", "module") else value)
+    ai_now = text is not None and quota.allow()
     if text is not None:
         set_text(db, m, text)
+        if not ai_now:
+            m.digest_error = f"{quota.message} Edit the text again to retry."
     db.commit()
-    if text is not None:
+    if ai_now:
         background.add_task(svc.digest_job, m.id)
     return detail(db, m)
 
@@ -169,10 +179,11 @@ def delete_material(material_id: int, db: DB, _: AdminUser):
 
 
 @router.post("/{material_id}/refetch", response_model=MaterialOut)
-def refetch(material_id: int, db: DB, _: AdminUser, background: BackgroundTasks):
+def refetch(material_id: int, db: DB, _: AdminUser, background: BackgroundTasks, quota: Quota):
     m = get_material(db, material_id)
     if m.kind != MaterialKind.url or not m.source_url:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Only URL materials can be refetched")
+    quota.take()
     try:
         _, text = fetch_article(m.source_url)
     except ArticleFetchError as e:

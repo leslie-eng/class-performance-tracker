@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import CodeEditor from '../components/CodeEditor'
 import { ErrorBanner, Icon, PageLoader, Spinner } from '../components/ui'
+import { AiModelBadge } from '../components/AiModelBadge'
 import { api } from '../lib/api'
 import { keys, useCodeAttempt, useExercise } from '../lib/queries'
 import { useCodeRunner, type RunOutcome } from '../lib/runner/useCodeRunner'
@@ -216,7 +217,10 @@ function AttemptCard({ a }: { a: CodeAttempt }) {
           <Spinner /> Reviewing your code…
         </p>
       ) : (
-        <p className={`mt-1 text-body-md ${a.grading_status === 'failed' ? 'text-on-surface-variant' : 'text-ink'}`}>{a.ai_feedback}</p>
+        <>
+          <p className={`mt-1 text-body-md ${a.grading_status === 'failed' ? 'text-on-surface-variant' : 'text-ink'}`}>{a.ai_feedback}</p>
+          {a.grading_status === 'done' && <AiModelBadge model={a.ai_model} className="mt-2" />}
+        </>
       )}
     </div>
   )

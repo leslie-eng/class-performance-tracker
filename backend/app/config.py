@@ -23,9 +23,26 @@ class Settings(BaseSettings):
     # "Today" for day numbers, streaks and the nightly lag check.
     timezone: str = "UTC"
 
-    # AI grading (Claude API). Grading is skipped when no key is configured.
-    anthropic_api_key: str | None = None
-    grading_model: str = "claude-opus-5-5"
+    # AI via OpenRouter (app/llm). All AI features are off when no key is configured.
+    # Model names are friendly names from app/llm/registry.py or raw OpenRouter ids.
+    openrouter_api_key: str | None = None
+    llm_default_model: str = "luna"
+    # Per-task overrides, "task=model,task=model". Tasks: grading, feedback, summary, generation.
+    llm_task_models: str = "generation=gemini-flash"
+    # Tried in order after the task's model (at most 3 models per request in total).
+    llm_fallback_models: str = "mistral-small,gemini-flash"
+    # Member data only goes to Zero Data Retention endpoints that don't collect data.
+    llm_require_zdr: bool = True
+    llm_timeout_seconds: float = 90
+    llm_max_retries: int = 2
+    llm_max_tokens: int = 16_000
+    # At startup, check the key with OpenRouter (a rejected key stops the boot).
+    llm_startup_check: bool = True
+    # Swap members' names, emails and phones in prompts for placeholders (app/llm/anonymize.py).
+    llm_anonymize: bool = True
+    # AI calls per member per hour (admins get the multiplier); see app/llm/ratelimit.py.
+    ai_rate_limit_per_hour: int = 30
+    ai_rate_limit_admin_multiplier: int = 5
     article_max_chars: int = 60_000
 
     # WhatsApp: "console" logs messages instead of sending; "meta" uses the Cloud API.
@@ -48,7 +65,6 @@ class Settings(BaseSettings):
     weekly_drop_day: str = "fri"
     weekly_drop_hour: int = 8
     monthly_quiz_week: str = "first"  # first | last
-    quiz_model: str | None = None  # defaults to grading_model
     require_quiz_review: bool = False  # generated quizzes start as drafts when true
     frontend_url: str = "http://localhost:5173"  # for links in WhatsApp messages
     whatsapp_weekly_template: str | None = None
@@ -80,8 +96,13 @@ class Settings(BaseSettings):
         return [s.strip() for s in self.specializations.split(",") if s.strip()]
 
     @property
-    def quiz_model_name(self) -> str:
-        return self.quiz_model or self.grading_model
+    def llm_task_model_map(self) -> dict[str, str]:
+        pairs = (p.split("=", 1) for p in self.llm_task_models.split(",") if "=" in p)
+        return {task.strip(): model.strip() for task, model in pairs if model.strip()}
+
+    @property
+    def llm_fallback_list(self) -> list[str]:
+        return [m.strip() for m in self.llm_fallback_models.split(",") if m.strip()]
 
     @property
     def admin_email_set(self) -> set[str]:

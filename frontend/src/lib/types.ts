@@ -69,6 +69,7 @@ export interface Submission {
   ai_score: number | null
   ai_breakdown: RubricBreakdown | null
   ai_feedback: string | null
+  ai_model?: string | null // OpenRouter model that produced the AI output
   ai_details: { title?: string; strengths?: string[]; improvements?: string[] } | null
   grade_overridden: boolean
   points_awarded: number
@@ -146,6 +147,7 @@ export interface Meta {
   timezone: string
   today: string
   specializations: string[]
+  ai_model_labels?: Record<string, string>
 }
 
 export interface LaggingMember {
@@ -176,6 +178,7 @@ export interface Brief {
   summary: string | null
   concepts: Concept[]
   summary_error: string | null
+  ai_model?: string | null // OpenRouter model that produced the AI output
   has_notes: boolean
   updated_at: string
   source_notes?: string | null
@@ -257,6 +260,7 @@ export interface QuizAttempt {
   points_awarded: number
   grading_status: GradingStatus
   grading_error: string | null
+  ai_model?: string | null // OpenRouter model that produced the AI output
   results: QuizResult[] | null
 }
 
@@ -295,6 +299,7 @@ export interface Material {
   char_count: number
   digest_ready: boolean
   digest_error: string | null
+  ai_model?: string | null // OpenRouter model that produced the AI output
   created_at: string
 }
 
@@ -327,6 +332,7 @@ export interface AdminQuiz {
   attempts: number
   sources: { id: number; title: string }[]
   created_at: string
+  ai_model?: string | null // OpenRouter model that produced the AI output
 }
 
 export interface AdminQuizDetail extends AdminQuiz {
@@ -360,6 +366,7 @@ export interface CodeAttempt {
   runner_error: string | null
   grading_status: GradingStatus
   ai_feedback: string | null
+  ai_model?: string | null // OpenRouter model that produced the AI output
   points_awarded: number
   created_at: string
 }
@@ -395,5 +402,62 @@ export interface AdminExercise {
   status: 'draft' | 'published'
   reference_solution: string | null
   tests_verified: boolean
+  ai_model?: string | null // OpenRouter model that produced the AI output
   created_at: string
+}
+
+export type LLMTask = 'grading' | 'feedback' | 'summary' | 'generation'
+
+export interface LLMModel {
+  key: string
+  id: string
+  label: string
+  tier: 'free' | 'cheap' | 'strong'
+  prompt_price: number
+  completion_price: number
+  context: number
+  zdr: boolean
+  allowed_for_member_data: boolean
+  notes: string
+}
+
+export interface LLMConfig {
+  configured: boolean
+  require_zdr: boolean
+  tasks: { task: LLMTask; model_id: string; label: string; source: 'admin' | 'env' | 'default' }[]
+  fallbacks: string[]
+  models: LLMModel[]
+}
+
+export interface LLMTestResult {
+  text: string
+  model_used: string
+  latency_ms: number
+  tokens_in: number
+  tokens_out: number
+  cost: number | null
+  cost_estimated: boolean
+}
+
+export interface LLMUsageGroup {
+  name: string
+  label: string
+  calls: number
+  errors: number
+  fallbacks: number
+  tokens_in: number
+  tokens_out: number
+  cost: number
+  cost_estimated: boolean
+  cost_per_call: number
+  avg_latency_ms: number
+  p95_latency_ms: number
+  error_types: string[]
+}
+
+export interface LLMUsage {
+  days: number
+  totals: { calls: number; errors: number; cost: number; tokens_in: number; tokens_out: number }
+  by_model: LLMUsageGroup[]
+  by_task: LLMUsageGroup[]
 }

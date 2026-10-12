@@ -33,7 +33,7 @@ The `render.yaml` blueprint deploys both services:
 - Set these environment variables in Render dashboard:
   - `CORS_ORIGINS` — **CRITICAL**: Must include your frontend URL, e.g. `https://classtrack-web.onrender.com`
   - `ADMIN_EMAILS` — Comma-separated emails that become admins on registration
-  - `ANTHROPIC_API_KEY` — Optional, for AI article grading
+  - `OPENROUTER_API_KEY` — Optional, turns on all AI features (see [AI models](#ai-models-openrouter) below)
   - `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_LAG_TEMPLATE` — Optional, for WhatsApp notifications
 
 #### Frontend (`classtrack-web`)
@@ -166,8 +166,8 @@ else sees it on `/weekly`.
   materials > Quizzes** until published. With it off (the default), they go live straight away, and you can still
   edit or unpublish them.
 - **Cost:** a weekly drop generates three quizzes (10, 20 and 30 minutes). A monthly drop adds three course
-  quizzes and three interview quizzes per specialization in use. Point `QUIZ_MODEL` at a cheaper Claude model to cut
-  generation cost; grading keeps using `GRADING_MODEL`.
+  quizzes and three interview quizzes per specialization in use. Generation uses the `generation` task's model
+  (Admin > AI models, or `LLM_TASK_MODELS`); pick a cheaper one there to cut cost.
 
 ### Coding exercises: where code runs
 
@@ -192,3 +192,73 @@ fall back to the browser result and are marked unverified.
 New exercises drafted from materials always need an admin to check them. **Admin > Learning materials > Coding
 exercises > Verify in browser** runs the reference solution against every test, including hidden ones, before you
 publish.
+
+## AI models (OpenRouter)
+
+All AI features (article grading, code feedback, weekly summaries, material digests, quiz and exercise generation)
+go through [OpenRouter](https://openrouter.ai), via `backend/app/llm/`. The Anthropic SDK is no longer used.
+
+### Render environment checklist (`classtrack-api` > Environment)
+
+| Variable | Set it to | Notes |
+|---|---|---|
+| `OPENROUTER_API_KEY` | your key, `sk-or-v1-...` | Required for AI. Unset = AI features show "not configured" |
+| `LLM_DEFAULT_MODEL` | `luna` | Blueprint default |
+| `LLM_TASK_MODELS` | `generation=gemini-flash` | Blueprint default |
+| `LLM_FALLBACK_MODELS` | `mistral-small,gemini-flash` | Blueprint default |
+| `LLM_REQUIRE_ZDR` | leave unset (`true`) | Never `false` in production: it would let member data reach providers that may log it |
+| `LLM_ANONYMIZE` | leave unset (`true`) | |
+| `AI_RATE_LIMIT_PER_HOUR` | leave unset (`30`) | Raise only if members hit it in normal use |
+| `LLM_STARTUP_CHECK` | leave unset (`true`) | |
+
+Remove the old `ANTHROPIC_API_KEY`, `GRADING_MODEL` and `QUIZ_MODEL` if they're still set; they're ignored.
+
+### One-time OpenRouter account setup
+
+1. **Credits:** buy at least $10 once. Paid models fail with 402 without credit, and the free-model limit rises
+   from 50 to 1,000 requests a day.
+2. **Privacy** (Settings > Privacy): turn off training for paid and free models, and turn on Zero Data Retention
+   for the account. The app already asks for this on every request; the account setting is the backstop.
+3. **Key:** create a key for this app only, with a monthly credit limit (for example $5). That caps the worst case
+   if something loops.
+4. Leave prompt logging off.
+
+### What happens at startup
+
+The API checks its configuration before serving requests and **refuses to start** (the deploy fails, with the
+reason in the logs) when:
+- `OPENROUTER_API_KEY` is set but OpenRouter rejects it;
+- a model setting names an unknown model or task, or a model without zero data retention while that's required;
+- `JWT_SECRET` is still `change-me`, or `WHATSAPP_PROVIDER=meta` is missing its token or number id.
+
+These only log a warning: no key at all (AI off), OpenRouter unreachable (so an OpenRouter outage can't block a
+deploy), a key with no credit left, or a configured model OpenRouter no longer lists. The key check calls
+OpenRouter's `/key` and `/models` endpoints, which don't run a model and cost nothing.
+
+### Switching models and rolling back
+
+- **Live:** Admin > AI models. Pick a model per task; it applies within about 30 seconds, no redeploy. "Reset" goes
+  back to the env setting. Use **Test a model** to try one first (reply, latency, tokens, cost).
+- **Rollback:** press Reset, or change `LLM_TASK_MODELS` / `LLM_DEFAULT_MODEL` in Render (redeploys in about a minute).
+- **Adding a model:** add it to `backend/app/llm/registry.py` with its prices and whether it has a zero-retention
+  provider (check https://openrouter.ai/api/v1/endpoints/zdr), then deploy.
+- **Comparing models before switching:** from `backend/`, `python -m scripts.compare_models` runs one sample prompt on
+  every registry model and prints reply, latency, tokens and cost; `--structured` grades a sample article with the
+  real rubric to check each model returns valid JSON. A few cents per run; nothing is written to the database.
+- **Comparing models in use:** Admin > AI models > Usage, `GET /admin/llm/usage?days=30`, or
+  `python -m scripts.llm_usage --days 30` with `DATABASE_URL` set (read-only).
+
+### Free-tier cold starts
+
+A free Render web service sleeps after about 15 minutes without traffic, and the first request after that waits
+for it to boot (often close to a minute). With AI:
+- Grading, feedback, summaries and digests run in the background after the request returns, so members only wait
+  for the boot; the page polls until the AI result is in.
+- The test button, Generate quizzes, Generate exercises and Regenerate summary wait for the model. Generation can take
+  a minute on its own, so after a cold start the browser may wait two. If it times out, try again: the server is
+  awake by then.
+- The startup key check adds at most a few seconds to a boot (8-second timeout per request; it never blocks).
+- The AI rate-limit counters and the model-choice cache are in memory and reset on each boot. That's harmless:
+  choices are re-read from the database.
+- The external cron that wakes the API for the Friday Drop ([above](#waking-the-api-for-the-friday-drop)) also
+  gives quiz generation a warm server.

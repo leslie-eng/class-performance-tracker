@@ -2,7 +2,7 @@
 
 ClassTrack keeps a study cohort accountable. Members join challenges and submit daily work: code, or a link to an
 article they wrote. They earn points and streaks and appear on challenge and global leaderboards. Article
-submissions are graded by Claude against a rubric. Members can also log job applications. A nightly job finds
+submissions are graded by an AI model (through OpenRouter) against a rubric. Members can also log job applications. A nightly job finds
 members who are falling behind and can send them a WhatsApp nudge, and admins get a weekly digest.
 
 | Part | Stack | Folder |
@@ -69,7 +69,7 @@ Tests: `cd backend && pip install -r requirements-dev.txt && pytest`. By default
 | PostgreSQL database | **Yes** | All app data: users, challenges, submissions, scores, job applications, notification log | [Render Postgres](https://render.com/docs/postgresql) (created by the Blueprint; the free tier expires after 30 days), [Neon](https://neon.tech) (free, does not expire), [Supabase](https://supabase.com) |
 | API host | **Yes** | Runs FastAPI, migrations and the nightly scheduler | Render Web Service, Python runtime |
 | Frontend host | **Yes** | Serves the built React app | Render Static Site, or Vercel (`frontend/vercel.json` is already set up) |
-| Anthropic API key | No | AI grading of article submissions. Without it, articles show "not configured" and admins grade them by hand | [console.anthropic.com](https://console.anthropic.com) > API Keys |
+| OpenRouter API key | No | All AI features: article grading, code feedback, weekly summaries, quiz and exercise generation. Without it they show "not configured" and admins grade by hand | [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys). Buy at least $10 of credit once (raises the free-model limit too) and set a monthly limit on the key |
 | Meta WhatsApp Cloud API | No | Sending lag nudges and the Friday Drop. The default provider is `console`, which only writes the messages to the logs | [developers.facebook.com](https://developers.facebook.com) > WhatsApp > API Setup |
 | External cron | Recommended on free Render | Wakes the sleeping API on Friday morning so the drop goes out on time | [cron-job.org](https://cron-job.org) (free) or a GitHub Actions schedule; see [DEPLOYMENT.md](DEPLOYMENT.md) |
 | Code sandbox | No | Verified runs of coding exercises, including hidden tests | Self-hosted [Judge0](https://github.com/judge0/judge0) on its own server. Not part of the free setup |
@@ -99,8 +99,14 @@ Templates with placeholders:
 | `PYTHON_VERSION` | Render only | Python version Render installs | `3.13` | — |
 | `FORWARDED_ALLOW_IPS` | Render only | Makes uvicorn trust Render's proxy headers, so the app sees the real client IP and `https` | `*` | — |
 | `TIMEZONE` | No (default `UTC`; the Blueprint sets `Africa/Nairobi`) | Defines "today" for streaks and day numbers, the time of the nightly lag check, and the Friday Drop time. Changing it moves all three | `Africa/Nairobi` | An [IANA tz name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) |
-| `ANTHROPIC_API_KEY` | No | Turns on AI grading, weekly summaries, quiz and exercise generation, and code feedback. Without it these show "not configured" | `sk-ant-...` | console.anthropic.com |
-| `GRADING_MODEL` | No (default `claude-opus-5-5`) | Claude model used for grading | `claude-opus-5-5` | Anthropic model list |
+| `OPENROUTER_API_KEY` | No | Turns on all AI features. Without it they show "not configured". If it's set but OpenRouter rejects it, **the API refuses to start** (the reason is in the deploy logs) | `sk-or-v1-...` | openrouter.ai/settings/keys |
+| `LLM_DEFAULT_MODEL` | No (default `luna`) | Model for every AI task without its own setting. A friendly name from `backend/app/llm/registry.py` (`luna`, `mistral-small`, `gemini-flash`) or an OpenRouter id | `luna` | — |
+| `LLM_TASK_MODELS` | No (default `generation=gemini-flash`) | Per-task models: `grading`, `feedback`, `summary`, `generation`. Admins can also switch these live on the Admin page, which overrides this | `generation=gemini-flash,summary=mistral-small` | — |
+| `LLM_FALLBACK_MODELS` | No (default `mistral-small,gemini-flash`) | Tried in order when a task's model fails or is rate-limited (3 models per request at most) | `mistral-small,gemini-flash` | — |
+| `LLM_REQUIRE_ZDR` | No (default `true`) | Member data only goes to providers with zero data retention; free models are refused for it. Keep `true` in production | `true` | — |
+| `LLM_ANONYMIZE` | No (default `true`) | Replaces members' names, emails and phone numbers in prompts with placeholders | `true` | — |
+| `AI_RATE_LIMIT_PER_HOUR` / `AI_RATE_LIMIT_ADMIN_MULTIPLIER` | No (default `30` / `5`) | AI calls per member per hour; admins get the multiplier | `30` / `5` | — |
+| `LLM_STARTUP_CHECK` | No (default `true`) | Checks the key with OpenRouter at startup (free; no model runs) | `true` | — |
 | `ADMIN_CAN_VIEW_JOB_APPLICATIONS` | No (default `false`) | Lets admins see members' job applications | `true` / `false` | You choose |
 | `WHATSAPP_PROVIDER` | No (default `console`) | `console` writes messages to the logs. `meta` sends them for real | `console` | — |
 | `WHATSAPP_TOKEN` | Only if `meta` | Meta Cloud API access token | `EAAG...` | Meta developer app > WhatsApp > API Setup |
@@ -112,7 +118,6 @@ Templates with placeholders:
 | `WEEKLY_DROP_DAY` / `WEEKLY_DROP_HOUR` | No (default `fri` / `8`) | When the Friday Drop goes out, in `TIMEZONE` | `fri` / `8` | — |
 | `MONTHLY_QUIZ_WEEK` | No (default `first`) | Which Friday of the month also releases the interview-prep and course quizzes | `first` or `last` | — |
 | `SPECIALIZATIONS` | No | Choices members can pick in Settings; the interview-prep quiz follows it (no choice = `general`) | `data_engineering,data_science,…,general` | You choose |
-| `QUIZ_MODEL` | No (default: `GRADING_MODEL`) | Claude model for summaries, digests, quiz and exercise generation | a cheaper Claude model | Anthropic model list |
 | `REQUIRE_QUIZ_REVIEW` | No (default `false`) | `true` keeps generated quizzes as drafts until an admin publishes them | `false` | — |
 | `FRONTEND_URL` | **Yes** for WhatsApp links | Link at the end of drop messages (`…/weekly`) | `https://classtrack-web.onrender.com` | Your static site's URL |
 | `WHATSAPP_WEEKLY_TEMPLATE` | Only if `meta` | Approved template with **one** body parameter, used for the drop and admin alerts. The message is sent as a single line | `weekly_drop` | Meta Business Manager > Message templates |
@@ -153,7 +158,7 @@ first three in one step.
    - `ADMIN_EMAILS`: your email address.
    - `CORS_ORIGINS`: `https://classtrack-web.onrender.com`. This is a guess at the URL; you'll fix it in step 4.
    - `VITE_API_URL`: `https://classtrack-api.onrender.com`. Also a guess; fixed in step 4.
-   - `ANTHROPIC_API_KEY` and the `WHATSAPP_*` values can be left blank.
+   - `OPENROUTER_API_KEY` and the `WHATSAPP_*` values can be left blank.
 3. Render creates `classtrack-db`, then `classtrack-api`, with `DATABASE_URL` wired from the database and
    `JWT_SECRET` generated. Then it creates `classtrack-web`.
 4. Check the real URLs at the top of each service page. If Render added a suffix, for example
@@ -190,7 +195,7 @@ Environment:
 - `ADMIN_EMAILS`: your email address.
 - `CORS_ORIGINS`: leave it for now; you'll set it in step 4.
 - `PYTHON_VERSION=3.13` and `FORWARDED_ALLOW_IPS=*`.
-- Optionally `ANTHROPIC_API_KEY`.
+- Optionally `OPENROUTER_API_KEY`.
 
 The start command runs migrations on every deploy, so you don't need a separate migration step.
 

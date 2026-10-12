@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import func, select
 
 from app.deps import DB, AdminUser
+from app.llm.ratelimit import Quota
 from app.models import LearningMaterial, MaterialStatus, Quiz, QuizAttempt, QuizKind, QuizStatus, as_utc
 from app.schemas_materials import AdminQuizOut, AdminQuizSummary, GenerateQuizIn, QuizUpdate, SourceRef
 from app.services import quizzes
@@ -20,7 +21,7 @@ def quiz_summary(db: DB, q: Quiz) -> AdminQuizSummary:
         duration_minutes=q.duration_minutes, status=q.status.value, error=q.error, question_count=len(q.questions or []),
         attempts=db.scalar(select(func.count()).where(QuizAttempt.quiz_id == q.id)) or 0,
         sources=[SourceRef(id=i, title=titles.get(i, f"deleted material {i}")) for i in ids],
-        created_at=as_utc(q.created_at),
+        created_at=as_utc(q.created_at), ai_model=q.ai_model,
     )
 
 
@@ -32,7 +33,7 @@ def get_quiz(db: DB, quiz_id: int) -> Quiz:
 
 
 @router.post("/generate", response_model=list[AdminQuizSummary | dict])
-def generate(body: GenerateQuizIn, db: DB, _: AdminUser):
+def generate(body: GenerateQuizIn, db: DB, _: AdminUser, quota: Quota):
     """Generate (or regenerate) quizzes for chosen materials, a module, or a week."""
     kind = QuizKind(body.kind)
     if kind == QuizKind.weekly:
@@ -48,6 +49,7 @@ def generate(body: GenerateQuizIn, db: DB, _: AdminUser):
     if material_ids is not None and not material_ids:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "No active materials match that selection")
 
+    quota.take(len(body.durations))
     results: list[AdminQuizSummary | dict] = []
     for duration in body.durations:
         try:

@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { EmptyState, ErrorBanner, Icon, PageLoader, ProgressBar, ScoreRing } from '../components/ui'
+import { AiModelBadge } from '../components/AiModelBadge'
 import { api } from '../lib/api'
 import { relativeTime } from '../lib/dates'
 import { useInvalidateProgress, useMySubmissions, useSubmission } from '../lib/queries'
@@ -207,6 +208,7 @@ function ArticleResult({ s }: { s: Submission }) {
             <span className="h-1.5 w-1.5 rounded-full bg-secondary" /> Overall feedback
           </p>
           <p className="mt-2 text-body-lg text-ink">“{s.ai_feedback}”</p>
+          <AiModelBadge model={s.ai_model} className="mt-3" />
         </div>
       </section>
 
@@ -292,6 +294,7 @@ function CodeResult({ s }: { s: Submission }) {
           <Icon name="psychology" className="text-[16px] text-primary-container" /> Reviewer comments
         </p>
         <p className="mt-3 text-body-lg text-ink">{s.ai_feedback}</p>
+        <AiModelBadge model={s.ai_model} className="mt-3" />
         <p className="mt-4 text-body-sm text-on-surface-variant">Code reviews are feedback only and don't change your points.</p>
       </section>
       <section className="overflow-hidden rounded-2xl bg-[#0f172a] shadow-lift">
