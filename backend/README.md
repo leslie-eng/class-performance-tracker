@@ -71,6 +71,7 @@ alembic/             migrations
 | GET | `/admin/notifications` | admin | Notification log |
 | PATCH | `/admin/submissions/{id}/grade` | admin | Override an AI score |
 | POST | `/admin/recompute` | admin | Rebuild all cached stats |
+| POST | `/admin/users` | admin | Create an account (admin by default; `is_admin: false` for a member) |
 | PATCH | `/admin/members/{id}/role?is_admin=` | admin | Grant/revoke admin |
 | GET | `/meta` | anyone | Server timezone and today's date (for the deadline countdown) |
 

@@ -264,3 +264,30 @@ def test_database_url_uses_psycopg3(url):
     from app.config import Settings
 
     assert Settings(database_url=url).database_url == "postgresql+psycopg://u:p@h:5432/db"
+
+
+# --- admin-created accounts ------------------------------------------------
+
+def test_admin_creates_admin_and_member_accounts(client, admin):
+    body = {"name": "Second Admin", "email": "Second@Example.com", "password": "password123"}
+    r = client.post("/admin/users", headers=admin, json=body)
+    assert r.status_code == 201, r.text
+    assert (r.json()["email"], r.json()["is_admin"]) == ("second@example.com", True)
+
+    login = client.post("/auth/login", data={"username": "second@example.com", "password": "password123"})
+    assert login.status_code == 200
+    new_admin = {"Authorization": f"Bearer {login.json()['access_token']}"}
+    assert client.get("/members", headers=new_admin).status_code == 200  # has admin rights
+
+    member = client.post("/admin/users", headers=admin, json={**body, "email": "m2@example.com", "is_admin": False})
+    assert member.status_code == 201 and member.json()["is_admin"] is False
+
+    assert client.post("/admin/users", headers=admin, json=body).status_code == 409  # email taken
+    assert client.post("/admin/users", headers=admin, json={**body, "email": "x@example.com", "password": "short"}).status_code == 422
+
+
+def test_only_admins_can_create_accounts(client, admin):
+    headers, _ = register(client, "plain@example.com")
+    body = {"name": "Sneaky", "email": "sneaky@example.com", "password": "password123"}
+    assert client.post("/admin/users", headers=headers, json=body).status_code == 403
+    assert client.post("/admin/users", json=body).status_code == 401
