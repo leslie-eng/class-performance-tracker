@@ -1,12 +1,17 @@
+import logging
+
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy import select
 
 from app.deps import DB, AdminUser, today
 from app.models import Enrollment, GradingStatus, Notification, Submission, User
-from app.schemas import GradeOverride, SubmissionOut, UserOut
+from app.schemas import AdminCreateUser, GradeOverride, SubmissionOut, UserOut
+from app.security import hash_password
 from app.scoring import recompute_enrollment
 from app.services.notifications import run_lag_check, run_weekly_digest
+
+log = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -85,4 +90,25 @@ def set_admin(user_id: int, is_admin: bool, db: DB, admin: AdminUser):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "You can't remove your own admin role")
     user.is_admin = is_admin
     db.commit()
+    return user
+
+
+@router.post("/users", response_model=UserOut, status_code=status.HTTP_201_CREATED)
+def create_user(body: AdminCreateUser, db: DB, admin: AdminUser):
+    """Create an account for someone else: an admin by default, or a member with
+    is_admin=false. Share the password with them so they can sign in."""
+    email = body.email.lower()
+    if db.scalar(select(User.id).where(User.email == email)):
+        raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
+    user = User(
+        name=body.name,
+        email=email,
+        phone_number=body.phone_number,
+        whatsapp_opt_in=body.whatsapp_opt_in and body.phone_number is not None,
+        password_hash=hash_password(body.password),
+        is_admin=body.is_admin,
+    )
+    db.add(user)
+    db.commit()
+    log.info("Admin %s created user %s (admin=%s)", admin.id, user.id, user.is_admin)
     return user
