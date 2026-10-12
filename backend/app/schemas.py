@@ -28,6 +28,12 @@ class RegisterIn(BaseModel):
     whatsapp_opt_in: bool = False
 
 
+class AdminCreateUser(RegisterIn):
+    """An admin creating an account for someone else (admin by default)."""
+
+    is_admin: bool = True
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"

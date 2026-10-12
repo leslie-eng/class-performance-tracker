@@ -74,6 +74,7 @@ alembic/             migrations
 | GET | `/admin/notifications` | admin | Notification log |
 | PATCH | `/admin/submissions/{id}/grade` | admin | Override an AI score |
 | POST | `/admin/recompute` | admin | Rebuild all cached stats |
+| POST | `/admin/users` | admin | Create an account (admin by default; `is_admin: false` for a member) |
 | PATCH | `/admin/members/{id}/role?is_admin=` | admin | Grant/revoke admin |
 | GET | `/admin/llm` | admin | AI models: per-task model and where it comes from, fallbacks, the registry |
 | PUT | `/admin/llm/tasks/{task}` | admin | Set a task's model live (`{"model": "mistral-small"}`; `null` = back to env) |
