@@ -1,5 +1,6 @@
 /** VITE_API_URL without a trailing slash; '/api' (the Vite dev proxy) when unset or blank. */
-function apiBase(raw: string | undefined): string {
+// Exported for unit tests; the module is the single place that resolves the base URL.
+export function apiBase(raw: string | undefined): string {
   const url = raw?.trim().replace(/\/+$/, '')
   if (!url) return '/api'
   // "classtrack-api.onrender.com" without a scheme would resolve against the frontend's own origin.
@@ -12,7 +13,7 @@ const TOKEN_KEY = 'classtrack.token'
 if (import.meta.env.PROD && BASE === '/api') {
   console.warn(
     '[api] VITE_API_URL was not set when this build was made, so requests go to /api on the frontend host. ' +
-      'Set VITE_API_URL to the API URL and rebuild.',
+    'Set VITE_API_URL to the API URL and rebuild.',
   )
 }
 
@@ -50,19 +51,20 @@ export function setToken(token: string | null, remember = true) {
   for (const s of storage()) s.removeItem(TOKEN_KEY)
   if (token) {
     try {
-      ;(remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, token)
+      ; (remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, token)
     } catch {
       /* memory only */
     }
   }
 }
 
-let onUnauthorized: () => void = () => {}
+let onUnauthorized: () => void = () => { }
 export function setUnauthorizedHandler(fn: () => void) {
   onUnauthorized = fn
 }
 
-function errorMessage(body: unknown, fallback: string): string {
+// Exported for unit tests; unwraps FastAPI's `detail` (string or validation array).
+export function errorMessage(body: unknown, fallback: string): string {
   const detail = (body as { detail?: unknown })?.detail
   if (typeof detail === 'string') return detail
   if (Array.isArray(detail) && detail.length) {
@@ -100,7 +102,7 @@ export async function api<T>(path: string, init: RequestInit & { json?: unknown 
     throw new ApiError(
       0,
       `Could not reach the API at ${BASE}. Check your connection, that VITE_API_URL is right, ` +
-        `and that the API's CORS_ORIGINS includes ${window.location.origin}.`,
+      `and that the API's CORS_ORIGINS includes ${window.location.origin}.`,
     )
   }
 
@@ -124,7 +126,7 @@ export async function api<T>(path: string, init: RequestInit & { json?: unknown 
     throw new ApiError(
       res.status,
       `The API URL returned a web page instead of JSON, so the request never reached the API. ` +
-        `VITE_API_URL is probably unset or points at the frontend (current: ${BASE}). Set it and rebuild.`,
+      `VITE_API_URL is probably unset or points at the frontend (current: ${BASE}). Set it and rebuild.`,
     )
   }
   return body as T
