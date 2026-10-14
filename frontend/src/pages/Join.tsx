@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { EmptyState, ErrorBanner, Icon, PageLoader } from '../components/ui'
 import { useChallenges, useEnroll } from '../lib/queries'
-import { useSession } from '../lib/session'
+import { useSession } from '../lib/session-context'
 
 export default function JoinPage() {
   const { user, meta, challenges: mine, selectChallenge } = useSession()

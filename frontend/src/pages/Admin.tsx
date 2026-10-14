@@ -5,7 +5,7 @@ import { Avatar, ErrorBanner, Icon } from '../components/ui'
 import { api } from '../lib/api'
 import { addDays } from '../lib/dates'
 import { keys, useChallenges } from '../lib/queries'
-import { useSession } from '../lib/session'
+import { useSession } from '../lib/session-context'
 import type { Challenge, DropPreview, LaggingMember, TaskTypes, User } from '../lib/types'
 
 interface NotificationRow {

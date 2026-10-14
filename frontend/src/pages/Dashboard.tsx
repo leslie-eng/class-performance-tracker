@@ -6,7 +6,7 @@ import { EmptyState, Icon, PageLoader, ProgressBar, ScoreRing, StatCard } from '
 import { addDays, dateForDay, dayNumber, formatCountdown, greeting, parseDay, relativeTime } from '../lib/dates'
 import { useCountdown } from '../lib/useCountdown'
 import { useLeaderboard, useMySubmissions } from '../lib/queries'
-import { useSession } from '../lib/session'
+import { useSession } from '../lib/session-context'
 import { submissionTitle } from '../lib/submissions'
 import type { Challenge, Submission, SubmissionType } from '../lib/types'
 

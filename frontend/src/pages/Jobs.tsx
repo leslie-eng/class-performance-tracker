@@ -5,7 +5,7 @@ import { downloadCsv, initials } from '../lib/format'
 import { api } from '../lib/api'
 import { relativeTime, shortDate } from '../lib/dates'
 import { keys, useJobApplications, useJobFeed } from '../lib/queries'
-import { useSession } from '../lib/session'
+import { useSession } from '../lib/session-context'
 import type { ApplicationSource, ApplicationStatus, JobApplication } from '../lib/types'
 
 const COLUMNS: { status: ApplicationStatus; label: string; dot: string }[] = [

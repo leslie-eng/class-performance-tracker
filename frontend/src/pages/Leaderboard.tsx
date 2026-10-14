@@ -4,7 +4,7 @@ import { Avatar, EmptyState, Icon, PageLoader, ProgressBar } from '../components
 import { downloadCsv } from '../lib/format'
 import { elapsedDays } from '../lib/dates'
 import { useLeaderboard } from '../lib/queries'
-import { useSession } from '../lib/session'
+import { useSession } from '../lib/session-context'
 import type { LeaderboardRow } from '../lib/types'
 
 const PAGE = 10
