@@ -1,5 +1,7 @@
 # ClassTrack: Class Performance Tracker
 
+[![CI](https://github.com/leslie-eng/class-performance-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/leslie-eng/class-performance-tracker/actions/workflows/ci.yml)
+
 ClassTrack keeps a study cohort accountable. Members join challenges and submit daily work: code, or a link to an
 article they wrote. They earn points and streaks and appear on challenge and global leaderboards. Article
 submissions are graded by Claude against a rubric. Members can also log job applications. A nightly job finds
