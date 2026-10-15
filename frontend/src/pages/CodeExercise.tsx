@@ -36,7 +36,7 @@ function Workspace({ ex }: { ex: ExerciseDetail }) {
     const t = window.setTimeout(async () => {
       setSaveState('saving')
       try {
-        await api(`/coding/exercises/${ex.id}/draft`, { method: 'PUT', json: { code } })
+        await api<void>(`/coding/exercises/${ex.id}/draft`, { method: 'PUT', json: { code } })
         lastSaved.current = code
         setSaveState('saved')
       } catch {

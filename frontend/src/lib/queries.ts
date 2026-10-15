@@ -100,7 +100,7 @@ export function useInvalidateProgress() {
 export function useEnroll() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (challengeId: number) => api(`/challenges/${challengeId}/enroll`, { method: 'POST' }),
+    mutationFn: (challengeId: number) => api<void>(`/challenges/${challengeId}/enroll`, { method: 'POST' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.challenges }),
   })
 }

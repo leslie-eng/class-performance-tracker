@@ -304,8 +304,8 @@ function JobForm({ initial, today, onClose, onSaved }: { initial: Partial<JobApp
     mutationFn: () => {
       const body = { ...form, notes: form.notes?.trim() || null, follow_up_date: form.follow_up_date || null }
       return initial.id
-        ? api(`/job-applications/${initial.id}`, { method: 'PATCH', json: body })
-        : api('/job-applications', { method: 'POST', json: body })
+        ? api<JobApplication>(`/job-applications/${initial.id}`, { method: 'PATCH', json: body })
+        : api<JobApplication>('/job-applications', { method: 'POST', json: body })
     },
     onSuccess: () => {
       onSaved()
@@ -313,7 +313,7 @@ function JobForm({ initial, today, onClose, onSaved }: { initial: Partial<JobApp
     },
   })
   const remove = useMutation({
-    mutationFn: () => api(`/job-applications/${initial.id}`, { method: 'DELETE' }),
+    mutationFn: () => api<void>(`/job-applications/${initial.id}`, { method: 'DELETE' }),
     onSuccess: () => {
       onSaved()
       onClose()

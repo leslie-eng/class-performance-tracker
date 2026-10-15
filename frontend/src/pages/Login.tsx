@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { ErrorBanner, Icon, Logo, Wordmark } from '../components/ui'
 import { api, login } from '../lib/api'
 import { useSession } from '../lib/session-context'
+import type { User } from '../lib/types'
 
 const FEATURES = [
   { icon: 'bolt', tint: 'bg-primary-fixed text-primary-container', title: 'Daily Task Log', body: 'Paste your code or link your article. Every day in the challenge is a slot to fill.' },
@@ -37,7 +38,7 @@ export default function LoginPage() {
     setBusy(true)
     try {
       if (mode === 'register') {
-        await api('/auth/register', {
+        await api<User>('/auth/register', {
           method: 'POST',
           json: {
             name: form.name.trim(),
