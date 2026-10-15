@@ -53,7 +53,7 @@ export default function LeaderboardPage() {
             {(['challenge', 'global'] as const).map((s) => (
               <button
                 key={s}
-                className={`rounded-md px-3 py-1.5 transition-colors ${scope === s ? 'bg-white font-medium text-primary-container shadow-card' : 'text-on-surface-variant hover:text-ink'}`}
+                className={`rounded-md px-3 py-1.5 transition-colors ${scope === s ? 'bg-surface-container-lowest font-medium text-primary-container shadow-card' : 'text-on-surface-variant hover:text-ink'}`}
                 onClick={() => {
                   setScope(s)
                   setPage(0)
@@ -135,7 +135,7 @@ export default function LeaderboardPage() {
                 </tbody>
               </table>
             </div>
-            <div className="flex items-center justify-between border-t border-slate-100 px-6 py-3 text-body-sm text-on-surface-variant">
+            <div className="flex items-center justify-between border-t border-outline-variant px-6 py-3 text-body-sm text-on-surface-variant">
               <span>
                 Showing <b className="text-ink">{shown.length}</b> of <b className="text-ink">{rows.length}</b> members
               </span>
@@ -175,7 +175,7 @@ export default function LeaderboardPage() {
 
 const PODIUM = {
   1: { ring: 'ring-[#f59e0b]', block: 'h-44 bg-gradient-to-b from-[#fde68a] to-[#fbbf24]', text: 'text-[#92400e]', label: 'Leader', icon: 'workspace_premium' },
-  2: { ring: 'ring-[#94a3b8]', block: 'h-32 bg-gradient-to-b from-[#e2e8f0] to-[#cbd5e1]', text: 'text-slate-600', label: 'Runner up', icon: 'military_tech' },
+  2: { ring: 'ring-[#94a3b8]', block: 'h-32 bg-gradient-to-b from-[#e2e8f0] to-[#cbd5e1]', text: 'text-on-surface-variant', label: 'Runner up', icon: 'military_tech' },
   3: { ring: 'ring-[#d97706]', block: 'h-24 bg-gradient-to-b from-[#fef3c7] to-[#fcd34d]', text: 'text-[#92400e]', label: 'Third', icon: 'military_tech' },
 } as const
 
@@ -194,7 +194,7 @@ function Podium({ rows, meId }: { rows: LeaderboardRow[]; meId: number }) {
               <div className="relative mb-3">
                 {place === 1 && <Icon name="workspace_premium" filled className="absolute -top-7 left-1/2 -translate-x-1/2 text-[28px] text-streak" />}
                 <Avatar name={r.name} id={r.user_id} size={place === 1 ? 84 : 68} ring={`ring-4 ${s.ring} ring-offset-2`} />
-                <span className={`pill absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white font-bold whitespace-nowrap shadow-card ${s.text}`}>
+                <span className={`pill absolute -bottom-2 left-1/2 -translate-x-1/2 bg-surface-container-lowest font-bold whitespace-nowrap shadow-card ${s.text}`}>
                   #{r.rank}
                 </span>
               </div>
@@ -222,9 +222,9 @@ function Podium({ rows, meId }: { rows: LeaderboardRow[]; meId: number }) {
 
 function StandingRow({ r, isMe, elapsed }: { r: LeaderboardRow; isMe: boolean; elapsed: number | null }) {
   const pct = elapsed ? Math.round((r.days_completed / elapsed) * 100) : null
-  const rankTint = r.rank === 1 ? 'bg-streak-bg text-streak-text' : r.rank === 2 ? 'bg-slate-100 text-slate-600' : r.rank === 3 ? 'bg-tertiary-fixed text-tertiary' : 'text-on-surface-variant'
+  const rankTint = r.rank === 1 ? 'bg-streak-bg text-streak-text' : r.rank === 2 ? 'bg-surface-container text-on-surface-variant' : r.rank === 3 ? 'bg-tertiary-fixed text-tertiary' : 'text-on-surface-variant'
   return (
-    <tr className={`border-t border-slate-100 ${isMe ? 'bg-primary-fixed/40 shadow-[inset_4px_0_0_#2563eb]' : 'hover:bg-surface-container-low/60'}`}>
+    <tr className={`border-t border-outline-variant ${isMe ? 'bg-primary-fixed/40 shadow-[inset_4px_0_0_#2563eb]' : 'hover:bg-surface-container-low/60'}`}>
       <td className="py-3.5 pr-2 pl-4 sm:px-6">
         <span className="flex items-center gap-2">
           <span className={`inline-flex h-8 min-w-8 items-center justify-center rounded-full px-1.5 font-mono text-label-md font-bold ${rankTint}`}>#{r.rank}</span>

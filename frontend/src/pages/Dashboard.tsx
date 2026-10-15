@@ -215,7 +215,7 @@ function SubmissionRow({ s }: { s: Submission }) {
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium text-ink">{submissionTitle(s)}</p>
         <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-body-sm text-on-surface-variant">
-          <span className="rounded bg-white px-1.5 py-0.5 font-mono">{isArticle ? 'Article' : (s.language ?? 'Code')}</span>
+          <span className="rounded bg-surface-container-lowest px-1.5 py-0.5 font-mono">{isArticle ? 'Article' : (s.language ?? 'Code')}</span>
           <span>{relativeTime(s.submitted_at)}</span>
           <span>•</span>
           {status}
@@ -253,11 +253,11 @@ function TodayCard({ challenge, day, inWindow, submitted, timezone }: { challeng
     <section className="rounded-2xl bg-primary-container p-6 text-white shadow-lift">
       <div className="flex items-center justify-between">
         {inWindow && !submitted ? (
-          <span className="pill bg-white/15 font-bold text-white">
+          <span className="pill bg-surface-container-lowest/15 font-bold text-white">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-secondary-fixed-dim" /> Due in {formatCountdown(secs)}
           </span>
         ) : (
-          <span className="pill bg-white/15 font-bold text-white">{submitted ? '✓ Submitted' : inWindow ? '' : 'Closed'}</span>
+          <span className="pill bg-surface-container-lowest/15 font-bold text-white">{submitted ? '✓ Submitted' : inWindow ? '' : 'Closed'}</span>
         )}
         <span className="font-mono text-label-sm text-white/70">Today</span>
       </div>
@@ -269,7 +269,7 @@ function TodayCard({ challenge, day, inWindow, submitted, timezone }: { challeng
         {challenge.description ?? `${types} submissions count toward your streak.`}
       </p>
       {inWindow && (
-        <Link to="/submit" className="btn mt-6 h-11 w-full bg-white text-primary-container hover:bg-primary-fixed">
+        <Link to="/submit" className="btn mt-6 h-11 w-full bg-surface-container-lowest text-primary-container hover:bg-primary-fixed">
           <Icon name={submitted ? 'add' : 'play_arrow'} filled className="text-[20px]" />
           {submitted ? 'Submit another' : 'Start Task Now'}
         </Link>

@@ -35,7 +35,7 @@ export default function AdminMaterialsPage() {
             role="tab"
             aria-selected={tab === t.id}
             onClick={() => setTab(t.id)}
-            className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-body-md ${tab === t.id ? 'bg-white font-semibold text-ink shadow-card' : 'text-on-surface-variant'}`}
+            className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-body-md ${tab === t.id ? 'bg-surface-container-lowest font-semibold text-ink shadow-card' : 'text-on-surface-variant'}`}
           >
             <Icon name={t.icon} className="text-[18px]" /> {t.label}
           </button>
@@ -204,7 +204,7 @@ function AddMaterial() {
             key={m}
             type="button"
             onClick={() => setMode(m)}
-            className={`flex-1 rounded-md px-2 py-1.5 text-body-sm ${mode === m ? 'bg-white font-semibold text-ink shadow-card' : 'text-on-surface-variant'}`}
+            className={`flex-1 rounded-md px-2 py-1.5 text-body-sm ${mode === m ? 'bg-surface-container-lowest font-semibold text-ink shadow-card' : 'text-on-surface-variant'}`}
           >
             {m === 'text' ? 'Paste text' : m === 'url' ? 'From URL' : 'Upload file'}
           </button>

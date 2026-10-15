@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useLeaderboard } from '../lib/queries'
 import { useSession } from '../lib/session-context'
+import { useTheme } from '../lib/useTheme'
 import { Avatar, Icon, Logo, StreakPill, Wordmark } from './ui'
 
 const NAV = [
@@ -42,7 +43,7 @@ function ChallengeSwitcher() {
         <Icon name="expand_more" className="text-[18px] text-on-surface-variant" />
       </button>
       {open && (
-        <div className="absolute top-full left-0 mt-2 w-72 rounded-xl bg-white p-1 shadow-modal">
+        <div className="absolute top-full left-0 mt-2 w-72 rounded-xl bg-surface-container-lowest p-1 shadow-modal">
           {challenges.map((c) => (
             <button
               key={c.id}
@@ -56,7 +57,7 @@ function ChallengeSwitcher() {
               {c.id === challenge.id && <Icon name="check" className="text-[18px]" />}
             </button>
           ))}
-          <div className="my-1 h-px bg-slate-100" />
+          <div className="my-1 h-px bg-surface-container" />
           <button
             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-on-surface-variant hover:bg-surface-container-low"
             onClick={() => {
@@ -74,6 +75,7 @@ function ChallengeSwitcher() {
 
 function UserMenu() {
   const { user, signOut } = useSession()
+  const { theme, toggle } = useTheme()
   const [open, setOpen] = useState(false)
   const ref = useClickOutside(() => setOpen(false))
   if (!user) return null
@@ -84,15 +86,23 @@ function UserMenu() {
         <span className="hidden text-body-md font-medium text-ink md:inline">{user.name}</span>
       </button>
       {open && (
-        <div className="absolute top-full right-0 mt-2 w-56 rounded-xl bg-white p-1 shadow-modal" onClick={() => setOpen(false)}>
+        <div className="absolute top-full right-0 mt-2 w-56 rounded-xl bg-surface-container-lowest p-1 shadow-modal" onClick={() => setOpen(false)}>
           <div className="px-3 py-2">
             <p className="truncate font-medium text-ink">{user.name}</p>
             <p className="truncate text-body-sm text-on-surface-variant">{user.email}</p>
           </div>
-          <div className="my-1 h-px bg-slate-100" />
+          <div className="my-1 h-px bg-surface-container" />
           <Link to="/settings" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-surface-container-low">
             <Icon name="settings" className="text-[18px]" /> Settings
           </Link>
+          <button
+            onClick={toggle}
+            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-surface-container-low"
+            aria-pressed={theme === 'dark'}
+          >
+            <Icon name={theme === 'dark' ? 'light_mode' : 'dark_mode'} className="text-[18px]" />
+            {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          </button>
           {user.is_admin && (
             <Link to="/admin" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-surface-container-low">
               <Icon name="admin_panel_settings" className="text-[18px]" /> Admin
@@ -172,7 +182,7 @@ export function AppShell() {
           </div>
         </div>
         {menuOpen && (
-          <nav className="flex flex-col gap-1 border-t border-slate-100 px-4 py-3 lg:hidden">
+          <nav className="flex flex-col gap-1 border-t border-outline-variant px-4 py-3 lg:hidden">
             {NAV.map((n) => (
               <NavLink key={n.to} to={n.to} end={n.end} className={linkClass}>
                 {n.label}

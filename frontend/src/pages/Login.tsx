@@ -158,7 +158,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-8 border-t border-slate-100 pt-6 text-center text-body-md text-on-surface-variant">
+        <div className="mt-8 border-t border-outline-variant pt-6 text-center text-body-md text-on-surface-variant">
           {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
           <button
             className="font-medium text-primary-container hover:underline"

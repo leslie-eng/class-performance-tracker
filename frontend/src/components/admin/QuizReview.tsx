@@ -111,7 +111,7 @@ function QuizEditor({ id }: { id: number }) {
       <ErrorBanner error={save.error ?? setStatus.error} />
       <ol className="mt-4 flex flex-col gap-4">
         {questions.map((x, i) => (
-          <li key={x.id} className="rounded-xl border border-slate-100 p-4">
+          <li key={x.id} className="rounded-xl border border-outline-variant p-4">
             <div className="flex flex-wrap items-center gap-2">
               <span className="label">
                 {i + 1}. {x.type === 'mcq' ? 'Multiple choice' : 'Short answer'}
@@ -160,7 +160,7 @@ function QuizEditor({ id }: { id: number }) {
         ))}
       </ol>
       {draft && (
-        <div className="sticky bottom-2 mt-4 flex justify-end gap-2 rounded-xl bg-white/90 p-2 backdrop-blur">
+        <div className="sticky bottom-2 mt-4 flex justify-end gap-2 rounded-xl bg-surface-container-lowest/90 p-2 backdrop-blur">
           <button className="btn-ghost" onClick={() => setDraft(null)}>
             Discard changes
           </button>

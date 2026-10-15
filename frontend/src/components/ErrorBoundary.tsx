@@ -42,7 +42,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
         return (
             <div className="flex min-h-screen items-center justify-center bg-surface px-4 py-10">
-                <div role="alert" className="w-full max-w-lg rounded-2xl bg-white p-6 text-center shadow-modal">
+                <div role="alert" className="w-full max-w-lg rounded-2xl bg-surface-container-lowest p-6 text-center shadow-modal">
                     <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-error-container text-error">
                         <span aria-hidden className="material-symbols-outlined text-[28px]">
                             error
