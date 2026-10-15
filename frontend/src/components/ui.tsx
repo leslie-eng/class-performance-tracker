@@ -1,5 +1,6 @@
 import { ApiError } from '../lib/api'
 import { initials } from '../lib/format'
+import { useCountUp } from '../lib/useCountUp'
 import type { ReactNode } from 'react'
 
 /**
@@ -116,6 +117,16 @@ export function ProgressBar({ value, className = 'bg-primary-container', track =
   )
 }
 
+/**
+ * A number that counts up to `value`. Wrapping the hook in a component means callers can drop
+ * this into JSX after an early return without breaking the Rules of Hooks; calling useCountUp
+ * directly in a component body below an early return would change hook order between renders.
+ */
+export function CountUp({ value, className = '' }: { value: number; className?: string }) {
+  const shown = useCountUp(value)
+  return <span className={className}>{shown.toLocaleString()}</span>
+}
+
 export function Spinner({ className = '' }: { className?: string }) {
   // aria-hidden comes from Icon; the visible text next to a spinner is the announcement.
   return <Icon name="progress_activity" className={`animate-spin ${className}`} />
@@ -168,7 +179,7 @@ export function StatCard({
   children: ReactNode
 }) {
   return (
-    <div className="card flex flex-col gap-3 p-5">
+    <div className="card animate-rise flex flex-col gap-3 p-5">
       <div className="flex items-start justify-between">
         <span className="text-body-md text-on-surface-variant">{label}</span>
         <span className={`flex h-9 w-9 items-center justify-center rounded-full ${iconClass}`}>

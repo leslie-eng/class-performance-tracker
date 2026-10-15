@@ -78,9 +78,42 @@
   --spacing-gutter: 1.5rem;
   --spacing-margin: 2rem;
 
+  /* Entrance used by StatCard; kept as a token so the reduced-motion blanket below can zero it. */
+  --animate-rise: rise 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+
   --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 0 0 1px rgb(15 23 42 / 0.05);
   --shadow-lift: 0 4px 6px -1px rgb(15 23 42 / 0.07), 0 2px 4px -2px rgb(15 23 42 / 0.05), 0 0 0 1px rgb(15 23 42 / 0.08);
   --shadow-modal: 0 20px 25px -5px rgb(15 23 42 / 0.1), 0 8px 10px -6px rgb(15 23 42 / 0.08);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * One blanket for every animation and transition in the app. Respecting the OS setting is
+ * not optional, and a single rule here means a future animation can't forget to opt in.
+ * 0.01ms rather than 0s: it still lets transitionend/animationend fire, so nothing that
+ * waits on those events hangs.
+ */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @layer base {
