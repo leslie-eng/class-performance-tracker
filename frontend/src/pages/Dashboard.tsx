@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Heatmap, HeatmapLegend } from '../components/Heatmap'
 import { RulesModal } from '../components/RulesModal'
-import { EmptyState, Icon, PageLoader, ProgressBar, ScoreRing, StatCard } from '../components/ui'
+import { CountUp, EmptyState, Icon, PageLoader, ProgressBar, ScoreRing, StatCard } from '../components/ui'
 import { addDays, dateForDay, dayNumber, formatCountdown, greeting, parseDay, relativeTime } from '../lib/dates'
 import { useCountdown } from '../lib/useCountdown'
 import { useLeaderboard, useMySubmissions } from '../lib/queries'
@@ -45,6 +45,8 @@ export default function DashboardPage() {
   const toBonus = rules.streak_bonus_every - (streak % rules.streak_bonus_every)
   const completedPct = Math.round(((me?.days_completed ?? 0) / challenge.total_days) * 100)
   const latestGraded = all.find((s) => s.submission_type === 'article' && s.grading_status === 'done' && s.ai_score !== null)
+  // An exact multiple of the bonus interval (7, 14, 21 ...) is a milestone worth a moment.
+  const reachedMilestone = streak > 0 && streak % rules.streak_bonus_every === 0 ? streak / rules.streak_bonus_every : 0
 
   return (
     <div className="flex flex-col gap-6">
@@ -88,7 +90,7 @@ export default function DashboardPage() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Current Streak" icon="local_fire_department" iconClass="bg-streak-bg text-streak">
           <p>
-            <span className="font-mono text-[40px] leading-none font-bold text-ink">{streak}</span>
+            <CountUp value={streak} className="font-mono text-[40px] leading-none font-bold text-ink" />
             <span className="ml-1.5 font-mono text-on-surface-variant">{streak === 1 ? 'day' : 'days'}</span>
           </p>
           <p className="text-body-sm text-on-surface-variant">
@@ -184,6 +186,7 @@ export default function DashboardPage() {
           <TodayCard challenge={challenge} day={day} inWindow={inWindow} submitted={submittedToday} timezone={meta.timezone} />
           <WeekCard today={today} done={done} challenge={challenge} />
           <MilestoneCard streak={streak} every={rules.streak_bonus_every} bonus={rules.streak_bonus_points} />
+          {reachedMilestone > 0 && <MilestoneCelebration multiple={reachedMilestone} />}
         </aside>
       </div>
 
@@ -314,6 +317,32 @@ function WeekCard({ today, done, challenge }: { today: string; done: Map<string,
             </div>
           )
         })}
+      </div>
+    </section>
+  )
+}
+
+/**
+ * Shown only when the current streak is exactly on a bonus boundary. `role="status"` +
+ * `aria-live` means a screen reader is told too, rather than this being a purely visual confetti.
+ */
+function MilestoneCelebration({ multiple }: { multiple: number }) {
+  return (
+    <section
+      role="status"
+      aria-live="polite"
+      className="animate-rise card flex items-center gap-4 border border-streak/40 p-5"
+    >
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-streak-bg text-streak">
+        <Icon name="celebration" filled />
+      </span>
+      <div>
+        <p className="font-semibold text-ink">
+          {multiple * 7}-day streak! You've hit it {multiple === 1 ? 'for the first time' : `${multiple} times`}.
+        </p>
+        <p className="text-body-sm text-on-surface-variant">
+          That's a bonus earned. Keep the run going.
+        </p>
       </div>
     </section>
   )
