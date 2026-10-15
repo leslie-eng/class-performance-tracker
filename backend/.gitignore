@@ -3,3 +3,6 @@ __pycache__/
 .env
 *.db
 .pytest_cache/
+# Written by the coverage run that pytest.ini enables by default.
+.coverage
+htmlcov/
