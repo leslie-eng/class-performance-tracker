@@ -175,10 +175,10 @@ export function StatCard({
 export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-900/20 p-4 backdrop-blur-sm sm:items-center"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-inverse-surface/30 p-4 backdrop-blur-sm sm:items-center"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div role="dialog" aria-modal aria-label={title} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-modal">
+      <div role="dialog" aria-modal aria-label={title} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface-container-lowest p-6 shadow-modal">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-headline-md text-ink">{title}</h2>
           <button className="btn-ghost h-8 px-2" onClick={onClose} aria-label="Close">

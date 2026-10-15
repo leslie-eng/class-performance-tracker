@@ -80,7 +80,7 @@ export default function CodeEditor({
   // minHeight lives on the wrapper in both states, so the editor doesn't jump once it loads.
   return (
     <div
-      className="max-w-full min-w-0 overflow-hidden rounded-xl border border-slate-200 font-mono text-[14px]"
+      className="max-w-full min-w-0 overflow-hidden rounded-xl border border-outline-variant font-mono text-[14px]"
       style={{ minHeight }}
     >
       {extension ? (

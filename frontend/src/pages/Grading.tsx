@@ -301,7 +301,7 @@ function CodeResult({ s }: { s: Submission }) {
             <span className="h-3 w-3 rounded-full bg-[#f59e0b]" />
             <span className="h-3 w-3 rounded-full bg-[#10b981]" />
           </span>
-          <span className="font-mono text-label-md text-slate-300">
+          <span className="font-mono text-label-md text-on-surface-variant">
             day-{s.day_number} · {s.language}
           </span>
         </div>

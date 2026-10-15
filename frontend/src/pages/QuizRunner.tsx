@@ -188,7 +188,7 @@ function QuestionInput({
           <label
             key={i}
             className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 text-body-md ${
-              value === i ? 'border-primary-container bg-primary-fixed/40' : 'border-slate-200 hover:bg-slate-50'
+              value === i ? 'border-primary-container bg-primary-fixed/40' : 'border-outline-variant hover:bg-surface-container-low'
             }`}
           >
             <input type="radio" name={q.id} className="mt-1 accent-[#2563eb]" checked={value === i} onChange={() => onAnswer(q.id, i)} />
