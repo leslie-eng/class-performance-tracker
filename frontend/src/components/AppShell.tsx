@@ -120,16 +120,36 @@ export function AppShell() {
   const { pathname } = useLocation()
   const [menuFor, setMenuFor] = useState<string | null>(null)
   const menuOpen = menuFor === pathname
+  const toggleRef = useRef<HTMLButtonElement>(null)
 
+  // Escape closes the drawer and returns focus to the button that opened it.
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setMenuFor(null)
+      toggleRef.current?.focus()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [menuOpen])
+
+  // Tighter padding from lg, where all seven items have to share the bar.
   const linkClass = ({ isActive }: { isActive: boolean }) =>
-    `rounded-lg px-3 py-1.5 transition-colors ${isActive ? 'bg-primary-container text-white font-medium' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'}`
+    `rounded-lg px-2 py-1.5 text-body-sm transition-colors xl:px-3 xl:text-body-md ${isActive ? 'bg-primary-container text-white font-medium' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'}`
 
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 bg-surface/90 shadow-[0_1px_8px_rgba(0,0,0,0.04)] backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-4 px-4 md:px-margin">
           <div className="flex shrink-0 items-center gap-4">
-            <button className="btn-ghost h-9 px-2 xl:hidden" onClick={() => setMenuFor(menuOpen ? null : pathname)} aria-label="Menu">
+            <button
+              ref={toggleRef}
+              className="btn-ghost h-9 px-2 lg:hidden"
+              onClick={() => setMenuFor(menuOpen ? null : pathname)}
+              aria-label={menuOpen ? 'Close menu' : 'Menu'}
+              aria-expanded={menuOpen}
+            >
               <Icon name={menuOpen ? 'close' : 'menu'} />
             </button>
             <Link to="/" className="flex items-center gap-2">
@@ -139,7 +159,7 @@ export function AppShell() {
             <div className="hidden h-5 w-px bg-surface-container-high lg:block" />
             <ChallengeSwitcher />
           </div>
-          <nav className="hidden items-center gap-1 xl:flex">
+          <nav className="hidden items-center gap-0.5 lg:flex xl:gap-1">
             {NAV.map((n) => (
               <NavLink key={n.to} to={n.to} end={n.end} className={linkClass}>
                 {n.label}
@@ -152,7 +172,7 @@ export function AppShell() {
           </div>
         </div>
         {menuOpen && (
-          <nav className="flex flex-col gap-1 border-t border-slate-100 px-4 py-3 xl:hidden">
+          <nav className="flex flex-col gap-1 border-t border-slate-100 px-4 py-3 lg:hidden">
             {NAV.map((n) => (
               <NavLink key={n.to} to={n.to} end={n.end} className={linkClass}>
                 {n.label}
