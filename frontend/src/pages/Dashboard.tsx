@@ -218,7 +218,8 @@ function SubmissionRow({ s }: { s: Submission }) {
           <span className="rounded bg-surface-container-lowest px-1.5 py-0.5 font-mono">{isArticle ? 'Article' : (s.language ?? 'Code')}</span>
           <span>{relativeTime(s.submitted_at)}</span>
           <span>•</span>
-          {status}
+          {/* Wrapper is always present, so the change from "Grading…" to "Graded 8/10" is announced. */}
+          <span aria-live="polite">{status}</span>
           {s.counts_for_streak ? <span className="font-mono text-secondary">+{s.points_awarded} pts</span> : <span className="font-mono">extra (no pts)</span>}
         </p>
       </div>
