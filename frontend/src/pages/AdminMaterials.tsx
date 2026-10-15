@@ -137,7 +137,12 @@ function MaterialRow({ m, checked, onCheck }: { m: Material; checked: boolean; o
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row">
         {m.kind === 'url' && (
-          <button className="btn-ghost h-8 px-2" onClick={() => refetch.mutate()} disabled={refetch.isPending} title="Fetch the page again">
+          <button
+            className="btn-ghost h-8 px-2"
+            onClick={() => refetch.mutate()}
+            disabled={refetch.isPending}
+            aria-label="Fetch the page again"
+          >
             <Icon name="refresh" className="text-[18px]" />
           </button>
         )}

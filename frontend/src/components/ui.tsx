@@ -2,6 +2,11 @@ import { ApiError } from '../lib/api'
 import { initials } from '../lib/format'
 import type { ReactNode } from 'react'
 
+/**
+ * Icon font ligature. Decorative by default: the ligature text ("progress_activity") is not a
+ * useful accessible name, so an icon-only control must carry its own aria-label. Icons that are
+ * genuinely the only content of a control get that label from the control, not from here.
+ */
 export function Icon({ name, className = '', filled = false }: { name: string; className?: string; filled?: boolean }) {
   return (
     <span aria-hidden className={`material-symbols-outlined select-none ${filled ? 'filled' : ''} ${className}`}>
@@ -112,13 +117,16 @@ export function ProgressBar({ value, className = 'bg-primary-container', track =
 }
 
 export function Spinner({ className = '' }: { className?: string }) {
+  // aria-hidden comes from Icon; the visible text next to a spinner is the announcement.
   return <Icon name="progress_activity" className={`animate-spin ${className}`} />
 }
 
 export function PageLoader() {
   return (
-    <div className="flex min-h-[40vh] items-center justify-center text-on-surface-variant">
+    // role=status + a visually-hidden label, so a screen reader hears "Loading" rather than silence.
+    <div role="status" className="flex min-h-[40vh] items-center justify-center text-on-surface-variant">
       <Spinner className="text-[32px]" />
+      <span className="sr-only">Loading</span>
     </div>
   )
 }

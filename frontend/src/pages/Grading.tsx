@@ -314,7 +314,8 @@ function CodeResult({ s }: { s: Submission }) {
 function PendingState() {
   return (
     <section className="card p-6">
-      <div className="flex items-center gap-3 text-primary-container">
+      {/* The page polls and re-renders itself; announce the state so it isn't silent. */}
+      <div role="status" aria-live="polite" className="flex items-center gap-3 text-primary-container">
         <Icon name="progress_activity" className="animate-spin" />
         <p className="font-medium">Grading in progress. This usually takes under a minute; the page updates on its own.</p>
       </div>
