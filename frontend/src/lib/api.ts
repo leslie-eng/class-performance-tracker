@@ -79,7 +79,12 @@ export function errorMessage(body: unknown, fallback: string): string {
   return fallback
 }
 
-export async function api<T>(path: string, init: RequestInit & { json?: unknown } = {}): Promise<T> {
+/**
+ * `T` defaults to `void`: a call with no explicit type argument, such as a DELETE, is treated
+ * as a call whose response is deliberately unused. Call sites that do use the body must name
+ * its type, so an unknown response can no longer be read as a typed value by accident.
+ */
+export async function api<T = void>(path: string, init: RequestInit & { json?: unknown } = {}): Promise<T> {
   const { json, headers, ...rest } = init
   const token = getToken()
   const url = `${BASE}${path}`

@@ -148,7 +148,7 @@ function EditorForm({ ex, onSaved, onDeleted }: { ex: AdminExercise; onSaved: (e
     onSuccess: onSaved,
   })
   const remove = useMutation({
-    mutationFn: () => api(`/admin/exercises/${ex.id}`, { method: 'DELETE' }),
+    mutationFn: () => api<void>(`/admin/exercises/${ex.id}`, { method: 'DELETE' }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: listKey })
       onDeleted()

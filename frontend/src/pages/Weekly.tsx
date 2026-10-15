@@ -162,7 +162,7 @@ function QuizButton({ slot, busy, onStart }: { slot: QuizSlot; busy: boolean; on
 function Projects({ w }: { w: WeeklyCurrent }) {
   const qc = useQueryClient()
   const pick = useMutation({
-    mutationFn: (id: number) => api('/weekly/projects/pick', { method: 'PUT', json: { proposal_id: id } }),
+    mutationFn: (id: number) => api<void>('/weekly/projects/pick', { method: 'PUT', json: { proposal_id: id } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.weekly }),
   })
   return (
@@ -220,7 +220,7 @@ function NextWeek({ w }: { w: WeeklyCurrent }) {
   const [notesOpen, setNotesOpen] = useState(false)
   const up = w.upcoming
   const withdraw = useMutation({
-    mutationFn: (id: number) => api(`/weekly/projects/${id}`, { method: 'DELETE' }),
+    mutationFn: (id: number) => api<void>(`/weekly/projects/${id}`, { method: 'DELETE' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.weekly }),
   })
   const blocked = up.my_proposal_id
