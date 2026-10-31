@@ -19,7 +19,8 @@ export default function JoinPage() {
       <div>
         <h1 className="text-headline-lg text-ink md:text-[28px]">{mine.length ? 'Your challenges' : 'Join a challenge'}</h1>
         <p className="text-body-md text-on-surface-variant">
-          Pick a challenge to start logging daily tasks. You can be in more than one at a time.
+          Pick a challenge to start logging daily tasks. You can be in more than one at a time. Have an idea for a new one?{' '}
+          <Link to="/challenges/proposals" className="text-primary-container underline">Propose a challenge</Link>.
         </p>
       </div>
       <ErrorBanner error={enroll.error} />
@@ -31,7 +32,10 @@ export default function JoinPage() {
                 Create the first one from the <Link to="/admin" className="text-primary-container underline">admin page</Link>.
               </>
             ) : (
-              'Ask your group admin to create a challenge, then come back here to join.'
+              <>
+                Ask your group admin to create one, or{' '}
+                <Link to="/challenges/proposals" className="text-primary-container underline">propose a challenge</Link> yourself.
+              </>
             )}
           </EmptyState>
         </div>

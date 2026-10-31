@@ -7,6 +7,7 @@ from app.config import get_settings
 from app.models import (
     ApplicationSource,
     ApplicationStatus,
+    ChallengeStatus,
     GradingStatus,
     SubmissionType,
     TaskTypes,
@@ -120,6 +121,7 @@ class ChallengeOut(ORM):
     task_types_allowed: TaskTypes
     scoring_rules: dict
     effective_rules: dict = {}
+    status: ChallengeStatus = ChallengeStatus.approved
 
     @model_validator(mode="after")
     def fill_rules(self):

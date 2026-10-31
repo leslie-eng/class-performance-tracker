@@ -4,9 +4,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
 from app.deps import DB, AdminUser, CurrentUser, today
-from app.models import Challenge, Enrollment
+from app.models import Challenge, ChallengeStatus, Enrollment, utcnow
 from app.schemas import ChallengeIn, ChallengeOut, ChallengeUpdate, EnrollmentOut, UserOut
 from app.scoring import recompute_enrollment
+from app.services.challenge_review import can_see
 
 router = APIRouter(prefix="/challenges", tags=["challenges"])
 
@@ -18,9 +19,22 @@ def get_challenge_or_404(db: DB, challenge_id: int) -> Challenge:
     return challenge
 
 
+def visible_challenge_or_404(db: DB, challenge_id: int, user) -> Challenge:
+    """Pending/rejected/cancelled challenges exist only for their creator and admins."""
+    challenge = get_challenge_or_404(db, challenge_id)
+    if not can_see(challenge, user):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Challenge not found")
+    return challenge
+
+
 @router.post("", response_model=ChallengeOut, status_code=status.HTTP_201_CREATED)
-def create_challenge(body: ChallengeIn, db: DB, _: AdminUser):
-    challenge = Challenge(**body.model_dump(exclude={"scoring_rules"}), scoring_rules=body.scoring_rules.overrides())
+def create_challenge(body: ChallengeIn, db: DB, admin: AdminUser):
+    """Admin-created challenges skip the queue: approved at once, with the admin as reviewer."""
+    challenge = Challenge(
+        **body.model_dump(exclude={"scoring_rules"}), scoring_rules=body.scoring_rules.overrides(),
+        status=ChallengeStatus.approved, created_by=admin.id, reviewed_by=admin.id, reviewed_at=utcnow(),
+        review_note="Created by an admin",
+    )
     db.add(challenge)
     db.commit()
     return challenge
@@ -28,7 +42,8 @@ def create_challenge(body: ChallengeIn, db: DB, _: AdminUser):
 
 @router.get("", response_model=list[ChallengeOut])
 def list_challenges(db: DB, _: CurrentUser, active_only: bool = False):
-    q = select(Challenge).order_by(Challenge.start_date.desc())
+    """Approved challenges only, for everyone. Proposals: /challenges/proposals/mine and /admin/challenges."""
+    q = select(Challenge).where(Challenge.status == ChallengeStatus.approved).order_by(Challenge.start_date.desc())
     if active_only:
         t = today()
         q = q.where(Challenge.start_date <= t, Challenge.end_date >= t)
@@ -46,8 +61,8 @@ def my_challenges(db: DB, user: CurrentUser):
 
 
 @router.get("/{challenge_id}", response_model=ChallengeOut)
-def get_challenge(challenge_id: int, db: DB, _: CurrentUser):
-    return get_challenge_or_404(db, challenge_id)
+def get_challenge(challenge_id: int, db: DB, user: CurrentUser):
+    return visible_challenge_or_404(db, challenge_id, user)
 
 
 @router.patch("/{challenge_id}", response_model=ChallengeOut)
@@ -69,7 +84,9 @@ def update_challenge(challenge_id: int, body: ChallengeUpdate, db: DB, _: AdminU
 
 @router.post("/{challenge_id}/enroll", response_model=EnrollmentOut, status_code=status.HTTP_201_CREATED)
 def enroll(challenge_id: int, db: DB, user: CurrentUser):
-    challenge = get_challenge_or_404(db, challenge_id)
+    challenge = visible_challenge_or_404(db, challenge_id, user)
+    if challenge.status != ChallengeStatus.approved:
+        raise HTTPException(status.HTTP_409_CONFLICT, f"This challenge is {challenge.status.value}; only approved challenges can be joined")
     if challenge.end_date < today():
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "This challenge has ended")
     enrollment = Enrollment(user_id=user.id, challenge_id=challenge.id)

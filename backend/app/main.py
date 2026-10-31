@@ -11,12 +11,15 @@ from app.deps import today
 from app.llm import registry
 from app.routers import (
     admin,
+    admin_challenges,
     admin_llm,
     admin_quizzes,
     admin_weekly,
     auth,
+    challenge_proposals,
     challenges,
     coding,
+    inbox,
     internal,
     job_applications,
     leaderboard,
@@ -77,8 +80,9 @@ app.add_middleware(
 )
 
 for r in (
-    auth, challenges, submissions, leaderboard, members, job_applications, admin,
-    weekly, quizzes, admin_weekly, internal, materials, admin_quizzes, coding, admin_llm,
+    # challenge_proposals before challenges: /challenges/proposals/... must not hit /challenges/{id}
+    auth, challenge_proposals, challenges, submissions, leaderboard, members, job_applications, admin,
+    weekly, quizzes, admin_weekly, internal, materials, admin_quizzes, coding, admin_llm, admin_challenges, inbox,
 ):
     app.include_router(r.router)
 

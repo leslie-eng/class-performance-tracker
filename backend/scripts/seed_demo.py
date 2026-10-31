@@ -17,6 +17,7 @@ from app.models import (
     ApplicationSource,
     ApplicationStatus,
     Challenge,
+    ChallengeStatus,
     Enrollment,
     GradingStatus,
     JobApplication,
@@ -71,6 +72,7 @@ def main() -> None:
             end_date=t + timedelta(days=75),
             task_types_allowed=TaskTypes.both,
             scoring_rules={},
+            status=ChallengeStatus.approved,
         )
         db.add(challenge)
         db.flush()
