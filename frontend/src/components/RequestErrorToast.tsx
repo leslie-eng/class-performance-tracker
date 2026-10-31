@@ -1,39 +1,18 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
-import { ApiError } from '../lib/api'
+import { useSyncExternalStore } from 'react'
+import { clearQueryError, getQueryError, subscribeToQueryErrors } from '../lib/query-errors'
 import { ErrorBanner, Icon } from './ui'
 
-let show: (err: unknown) => void = (err: unknown) => {
-  pendingError = err
-}
-let pendingError: unknown = null
-
 /**
- * QueryCache onError hook for failed data loads. Mutations show their own inline ErrorBanner;
- * without this, a failed load (e.g. /auth/me blocked by CORS) just leaves a spinner on screen.
+ * Shows failed data loads. Mutations render their own inline ErrorBanner; without this, a
+ * failed load (e.g. /auth/me blocked by CORS) just leaves a spinner on screen.
+ *
+ * State comes from the module store via useSyncExternalStore rather than an effect that
+ * calls setState, which caused a cascading render on mount.
  */
-export function reportQueryError(err: unknown) {
-  if (err instanceof ApiError && err.status === 401) return // session expired: signOut handles it
-  show(err)
-}
-
 export function RequestErrorToast() {
   const qc = useQueryClient()
-  const [error, setError] = useState<unknown>(null)
-
-  useEffect(() => {
-    show = setError
-    // Flush any error reported before mount
-    if (pendingError) {
-      setError(pendingError)
-      pendingError = null
-    }
-    return () => {
-      show = (err) => {
-        pendingError = err
-      }
-    }
-  }, [])
+  const error = useSyncExternalStore(subscribeToQueryErrors, getQueryError, getQueryError)
 
   if (!error) return null
   return (
@@ -44,7 +23,7 @@ export function RequestErrorToast() {
           type="button"
           className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-primary hover:bg-surface-container-low"
           onClick={() => {
-            setError(null)
+            clearQueryError()
             qc.refetchQueries({ type: 'active' })
           }}
         >
@@ -54,7 +33,7 @@ export function RequestErrorToast() {
         <button
           type="button"
           className="rounded-lg px-3 py-1.5 text-on-surface-variant hover:bg-surface-container-low"
-          onClick={() => setError(null)}
+          onClick={clearQueryError}
         >
           Dismiss
         </button>

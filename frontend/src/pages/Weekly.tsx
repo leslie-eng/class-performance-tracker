@@ -7,7 +7,7 @@ import { AiModelBadge } from '../components/AiModelBadge'
 import { api } from '../lib/api'
 import { shortDate } from '../lib/dates'
 import { keys, useQuizLeaderboard, useWeekly } from '../lib/queries'
-import { useSession } from '../lib/session'
+import { useSession } from '../lib/session-context'
 import type { Proposal, QuizAttempt, QuizKind, QuizSlot, WeeklyCurrent } from '../lib/types'
 
 const KIND_LABEL: Record<QuizKind, string> = {
@@ -164,7 +164,7 @@ function QuizButton({ slot, busy, onStart }: { slot: QuizSlot; busy: boolean; on
 function Projects({ w }: { w: WeeklyCurrent }) {
   const qc = useQueryClient()
   const pick = useMutation({
-    mutationFn: (id: number) => api('/weekly/projects/pick', { method: 'PUT', json: { proposal_id: id } }),
+    mutationFn: (id: number) => api<void>('/weekly/projects/pick', { method: 'PUT', json: { proposal_id: id } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.weekly }),
   })
   return (
@@ -206,7 +206,7 @@ function Projects({ w }: { w: WeeklyCurrent }) {
 
 function ProjectCard({ p, children }: { p: Proposal; children?: ReactNode }) {
   return (
-    <li className="rounded-xl border border-slate-100 p-4">
+    <li className="rounded-xl border border-outline-variant p-4">
       <p className="font-semibold break-words text-ink">{p.title}</p>
       <p className="mt-1 text-body-md break-words whitespace-pre-line text-on-surface-variant">{p.description}</p>
       <p className="mt-2 text-body-sm text-on-surface-variant">Proposed by {p.proposer_name}</p>
@@ -222,7 +222,7 @@ function NextWeek({ w }: { w: WeeklyCurrent }) {
   const [notesOpen, setNotesOpen] = useState(false)
   const up = w.upcoming
   const withdraw = useMutation({
-    mutationFn: (id: number) => api(`/weekly/projects/${id}`, { method: 'DELETE' }),
+    mutationFn: (id: number) => api<void>(`/weekly/projects/${id}`, { method: 'DELETE' }),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.weekly }),
   })
   const blocked = up.my_proposal_id
@@ -255,7 +255,7 @@ function NextWeek({ w }: { w: WeeklyCurrent }) {
         </button>
         {blocked && <span className="text-body-sm text-on-surface-variant">{blocked}</span>}
       </div>
-      <div className="mt-6 border-t border-slate-100 pt-4">
+      <div className="mt-6 border-t border-outline-variant pt-4">
         <button className="flex w-full items-center justify-between text-left font-semibold text-ink" onClick={() => setNotesOpen((o) => !o)}>
           <span className="flex items-center gap-2">
             <Icon name="edit_note" className="text-primary-container" /> Class notes {up.has_notes ? '(added)' : '(missing)'}

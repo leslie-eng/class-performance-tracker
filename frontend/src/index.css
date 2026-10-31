@@ -78,19 +78,116 @@
   --spacing-gutter: 1.5rem;
   --spacing-margin: 2rem;
 
+  /* Entrance used by StatCard; kept as a token so the reduced-motion blanket below can zero it. */
+  --animate-rise: rise 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+
   --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 0 0 1px rgb(15 23 42 / 0.05);
   --shadow-lift: 0 4px 6px -1px rgb(15 23 42 / 0.07), 0 2px 4px -2px rgb(15 23 42 / 0.05), 0 0 0 1px rgb(15 23 42 / 0.08);
   --shadow-modal: 0 20px 25px -5px rgb(15 23 42 / 0.1), 0 8px 10px -6px rgb(15 23 42 / 0.08);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * One blanket for every animation and transition in the app. Respecting the OS setting is
+ * not optional, and a single rule here means a future animation can't forget to opt in.
+ * 0.01ms rather than 0s: it still lets transitionend/animationend fire, so nothing that
+ * waits on those events hangs.
+ */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @layer base {
   body {
     @apply bg-surface text-on-surface font-sans text-body-md antialiased;
   }
+
+  /* Tells the browser to render native controls (scrollbars, form fields, caret)
+     in the matching scheme. Without this, dark mode keeps light scrollbars. */
+  :root {
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+}
+
+/*
+ * Dark theme. Tailwind v4 emits `var(--color-*)` into the utilities it generates, so
+ * redefining those variables on .dark re-themes every `bg-surface` / `text-ink` / etc.
+ * without touching a single component.
+ *
+ * Primary/secondary/tertiary stay put: the brand colours read fine on a dark surface, and
+ * the places that pair them with white text (the buttons, the primary cards) still work.
+ */
+@layer base {
+  .dark {
+    --color-surface: #0e1118;
+    --color-surface-dim: #0a0c11;
+    --color-surface-bright: #1a2030;
+    --color-surface-container-lowest: #171c27;
+    --color-surface-container-low: #1c2230;
+    --color-surface-container: #222937;
+    --color-surface-container-high: #2a3242;
+    --color-surface-container-highest: #333c4e;
+    --color-on-surface: #e6e9f2;
+    --color-on-surface-variant: #b3bacb;
+    --color-inverse-surface: #e6e9f2;
+    --color-inverse-on-surface: #1a2030;
+    --color-outline: #8a92a6;
+    --color-outline-variant: #3a4356;
+
+    --color-primary-fixed: #1e2a4a;
+    --color-primary-fixed-dim: #2b3a63;
+
+    --color-secondary-container: #1c3a26;
+    --color-on-secondary-container: #6ee79a;
+
+    --color-tertiary-fixed: #3b2f16;
+    --color-tertiary-fixed-dim: #5a4620;
+
+    --color-error: #ff8a80;
+    --color-error-container: #4a1f1c;
+    --color-on-error-container: #ffdad6;
+
+    --color-streak: #fbbf24;
+    --color-streak-bg: #3a2f14;
+    --color-streak-text: #fcd34d;
+
+    --color-ink: #eef1f8;
+
+    /* The heatmap already runs light -> dark green; on a dark surface the lightest
+       step has to invert or the "no activity" cells glow. */
+    --color-heat-0: #262d3b;
+    --color-heat-1: #14532d;
+    --color-heat-2: #166534;
+    --color-heat-3: #22c55e;
+    --color-heat-4: #4ade80;
+  }
 }
 
 @utility card {
-  @apply rounded-2xl bg-white shadow-card;
+  @apply rounded-2xl bg-surface-container-lowest shadow-card;
 }
 
 @utility btn {
@@ -102,15 +199,15 @@
 }
 
 @utility btn-secondary {
-  @apply btn border border-slate-200 bg-white text-ink hover:bg-slate-50;
+  @apply btn border border-outline-variant bg-surface-container-lowest text-ink hover:bg-surface-container-low;
 }
 
 @utility btn-ghost {
-  @apply btn text-slate-500 hover:bg-slate-100 hover:text-ink;
+  @apply btn text-on-surface-variant hover:bg-surface-container hover:text-ink;
 }
 
 @utility input {
-  @apply h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-ink placeholder:text-slate-400 focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 focus:outline-none;
+  @apply h-10 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 text-ink placeholder:text-outline focus:border-primary-container focus:ring-2 focus:ring-primary-container/20 focus:outline-none;
 }
 
 @utility label {
@@ -126,14 +223,21 @@
   line-height: 1;
   vertical-align: middle;
 }
+
 .material-symbols-outlined.filled {
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 @keyframes shimmer {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
+  0% {
+    background-position: -400px 0;
+  }
+
+  100% {
+    background-position: 400px 0;
+  }
 }
+
 .skeleton {
   background: linear-gradient(90deg, #eaedff 0%, #f2f3ff 50%, #eaedff 100%);
   background-size: 800px 100%;

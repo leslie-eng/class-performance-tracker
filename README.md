@@ -1,5 +1,7 @@
 # ClassTrack: Class Performance Tracker
 
+[![CI](https://github.com/leslie-eng/class-performance-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/leslie-eng/class-performance-tracker/actions/workflows/ci.yml)
+
 ClassTrack keeps a study cohort accountable. Members join challenges and submit daily work: code, or a link to an
 article they wrote. They earn points and streaks and appear on challenge and global leaderboards. Article
 submissions are graded by an AI model (through OpenRouter) against a rubric. Members can also log job applications. A nightly job finds
@@ -276,3 +278,9 @@ UPDATE users SET is_admin = true WHERE email = 'you@example.com';
 
 `python -m scripts.seed_demo` (run from `backend/`) creates a demo cohort with the admin login
 `demo@classtrack.dev` / `password123`. It only runs on an empty database and is for demos, not production.
+
+---
+
+## 7. Contributing
+
+Branch naming, quality gates, migration rules and the PR checklist are in [CONTRIBUTING.md](CONTRIBUTING.md).

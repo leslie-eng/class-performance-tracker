@@ -1,7 +1,13 @@
 import { ApiError } from '../lib/api'
 import { initials } from '../lib/format'
+import { useCountUp } from '../lib/useCountUp'
 import type { ReactNode } from 'react'
 
+/**
+ * Icon font ligature. Decorative by default: the ligature text ("progress_activity") is not a
+ * useful accessible name, so an icon-only control must carry its own aria-label. Icons that are
+ * genuinely the only content of a control get that label from the control, not from here.
+ */
 export function Icon({ name, className = '', filled = false }: { name: string; className?: string; filled?: boolean }) {
   return (
     <span aria-hidden className={`material-symbols-outlined select-none ${filled ? 'filled' : ''} ${className}`}>
@@ -111,14 +117,27 @@ export function ProgressBar({ value, className = 'bg-primary-container', track =
   )
 }
 
+/**
+ * A number that counts up to `value`. Wrapping the hook in a component means callers can drop
+ * this into JSX after an early return without breaking the Rules of Hooks; calling useCountUp
+ * directly in a component body below an early return would change hook order between renders.
+ */
+export function CountUp({ value, className = '' }: { value: number; className?: string }) {
+  const shown = useCountUp(value)
+  return <span className={className}>{shown.toLocaleString()}</span>
+}
+
 export function Spinner({ className = '' }: { className?: string }) {
+  // aria-hidden comes from Icon; the visible text next to a spinner is the announcement.
   return <Icon name="progress_activity" className={`animate-spin ${className}`} />
 }
 
 export function PageLoader() {
   return (
-    <div className="flex min-h-[40vh] items-center justify-center text-on-surface-variant">
+    // role=status + a visually-hidden label, so a screen reader hears "Loading" rather than silence.
+    <div role="status" className="flex min-h-[40vh] items-center justify-center text-on-surface-variant">
       <Spinner className="text-[32px]" />
+      <span className="sr-only">Loading</span>
     </div>
   )
 }
@@ -160,7 +179,7 @@ export function StatCard({
   children: ReactNode
 }) {
   return (
-    <div className="card flex flex-col gap-3 p-5">
+    <div className="card animate-rise flex flex-col gap-3 p-5">
       <div className="flex items-start justify-between">
         <span className="text-body-md text-on-surface-variant">{label}</span>
         <span className={`flex h-9 w-9 items-center justify-center rounded-full ${iconClass}`}>
@@ -175,10 +194,10 @@ export function StatCard({
 export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-900/20 p-4 backdrop-blur-sm sm:items-center"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-inverse-surface/30 p-4 backdrop-blur-sm sm:items-center"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div role="dialog" aria-modal aria-label={title} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-modal">
+      <div role="dialog" aria-modal aria-label={title} className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-surface-container-lowest p-6 shadow-modal">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-headline-md text-ink">{title}</h2>
           <button className="btn-ghost h-8 px-2" onClick={onClose} aria-label="Close">

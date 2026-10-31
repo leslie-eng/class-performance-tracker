@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useLeaderboard } from '../lib/queries'
-import { useSession } from '../lib/session'
+import { useSession } from '../lib/session-context'
+import { useTheme } from '../lib/useTheme'
 import { Avatar, Icon, Logo, StreakPill, Wordmark } from './ui'
 
 const NAV = [
@@ -42,7 +43,7 @@ function ChallengeSwitcher() {
         <Icon name="expand_more" className="text-[18px] text-on-surface-variant" />
       </button>
       {open && (
-        <div className="absolute top-full left-0 mt-2 w-72 rounded-xl bg-white p-1 shadow-modal">
+        <div className="absolute top-full left-0 mt-2 w-72 rounded-xl bg-surface-container-lowest p-1 shadow-modal">
           {challenges.map((c) => (
             <button
               key={c.id}
@@ -56,7 +57,7 @@ function ChallengeSwitcher() {
               {c.id === challenge.id && <Icon name="check" className="text-[18px]" />}
             </button>
           ))}
-          <div className="my-1 h-px bg-slate-100" />
+          <div className="my-1 h-px bg-surface-container" />
           <button
             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-on-surface-variant hover:bg-surface-container-low"
             onClick={() => {
@@ -74,6 +75,7 @@ function ChallengeSwitcher() {
 
 function UserMenu() {
   const { user, signOut } = useSession()
+  const { theme, toggle } = useTheme()
   const [open, setOpen] = useState(false)
   const ref = useClickOutside(() => setOpen(false))
   if (!user) return null
@@ -84,15 +86,23 @@ function UserMenu() {
         <span className="hidden text-body-md font-medium text-ink md:inline">{user.name}</span>
       </button>
       {open && (
-        <div className="absolute top-full right-0 mt-2 w-56 rounded-xl bg-white p-1 shadow-modal" onClick={() => setOpen(false)}>
+        <div className="absolute top-full right-0 mt-2 w-56 rounded-xl bg-surface-container-lowest p-1 shadow-modal" onClick={() => setOpen(false)}>
           <div className="px-3 py-2">
             <p className="truncate font-medium text-ink">{user.name}</p>
             <p className="truncate text-body-sm text-on-surface-variant">{user.email}</p>
           </div>
-          <div className="my-1 h-px bg-slate-100" />
+          <div className="my-1 h-px bg-surface-container" />
           <Link to="/settings" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-surface-container-low">
             <Icon name="settings" className="text-[18px]" /> Settings
           </Link>
+          <button
+            onClick={toggle}
+            className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-surface-container-low"
+            aria-pressed={theme === 'dark'}
+          >
+            <Icon name={theme === 'dark' ? 'light_mode' : 'dark_mode'} className="text-[18px]" />
+            {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          </button>
           {user.is_admin && (
             <Link to="/admin" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-surface-container-low">
               <Icon name="admin_panel_settings" className="text-[18px]" /> Admin
@@ -120,16 +130,36 @@ export function AppShell() {
   const { pathname } = useLocation()
   const [menuFor, setMenuFor] = useState<string | null>(null)
   const menuOpen = menuFor === pathname
+  const toggleRef = useRef<HTMLButtonElement>(null)
 
+  // Escape closes the drawer and returns focus to the button that opened it.
+  useEffect(() => {
+    if (!menuOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      setMenuFor(null)
+      toggleRef.current?.focus()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [menuOpen])
+
+  // Tighter padding from lg, where all seven items have to share the bar.
   const linkClass = ({ isActive }: { isActive: boolean }) =>
-    `rounded-lg px-3 py-1.5 transition-colors ${isActive ? 'bg-primary-container text-white font-medium' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'}`
+    `rounded-lg px-2 py-1.5 text-body-sm transition-colors xl:px-3 xl:text-body-md ${isActive ? 'bg-primary-container text-white font-medium' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'}`
 
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 bg-surface/90 shadow-[0_1px_8px_rgba(0,0,0,0.04)] backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-4 px-4 md:px-margin">
           <div className="flex shrink-0 items-center gap-4">
-            <button className="btn-ghost h-9 px-2 xl:hidden" onClick={() => setMenuFor(menuOpen ? null : pathname)} aria-label="Menu">
+            <button
+              ref={toggleRef}
+              className="btn-ghost h-9 px-2 lg:hidden"
+              onClick={() => setMenuFor(menuOpen ? null : pathname)}
+              aria-label={menuOpen ? 'Close menu' : 'Menu'}
+              aria-expanded={menuOpen}
+            >
               <Icon name={menuOpen ? 'close' : 'menu'} />
             </button>
             <Link to="/" className="flex items-center gap-2">
@@ -139,7 +169,7 @@ export function AppShell() {
             <div className="hidden h-5 w-px bg-surface-container-high lg:block" />
             <ChallengeSwitcher />
           </div>
-          <nav className="hidden items-center gap-1 xl:flex">
+          <nav className="hidden items-center gap-0.5 lg:flex xl:gap-1">
             {NAV.map((n) => (
               <NavLink key={n.to} to={n.to} end={n.end} className={linkClass}>
                 {n.label}
@@ -152,7 +182,7 @@ export function AppShell() {
           </div>
         </div>
         {menuOpen && (
-          <nav className="flex flex-col gap-1 border-t border-slate-100 px-4 py-3 xl:hidden">
+          <nav className="flex flex-col gap-1 border-t border-outline-variant px-4 py-3 lg:hidden">
             {NAV.map((n) => (
               <NavLink key={n.to} to={n.to} end={n.end} className={linkClass}>
                 {n.label}

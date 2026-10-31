@@ -6,7 +6,7 @@ import { ErrorBanner, Icon } from '../components/ui'
 import { AiModelBadge } from '../components/AiModelBadge'
 import { api } from '../lib/api'
 import { shortDate } from '../lib/dates'
-import { useSession } from '../lib/session'
+import { useSession } from '../lib/session-context'
 import type { AdminQuiz, Material, QuizKind } from '../lib/types'
 
 type Tab = 'materials' | 'quizzes' | 'exercises'
@@ -36,7 +36,7 @@ export default function AdminMaterialsPage() {
             role="tab"
             aria-selected={tab === t.id}
             onClick={() => setTab(t.id)}
-            className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-body-md ${tab === t.id ? 'bg-white font-semibold text-ink shadow-card' : 'text-on-surface-variant'}`}
+            className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-body-md ${tab === t.id ? 'bg-surface-container-lowest font-semibold text-ink shadow-card' : 'text-on-surface-variant'}`}
           >
             <Icon name={t.icon} className="text-[18px]" /> {t.label}
           </button>
@@ -108,10 +108,10 @@ function MaterialRow({ m, checked, onCheck }: { m: Material; checked: boolean; o
   const qc = useQueryClient()
   const refresh = () => qc.invalidateQueries({ queryKey: materialsKey })
   const archive = useMutation({
-    mutationFn: () => api(`/admin/materials/${m.id}`, { method: 'PATCH', json: { status: m.status === 'active' ? 'archived' : 'active' } }),
+    mutationFn: () => api<Material>(`/admin/materials/${m.id}`, { method: 'PATCH', json: { status: m.status === 'active' ? 'archived' : 'active' } }),
     onSuccess: refresh,
   })
-  const refetch = useMutation({ mutationFn: () => api(`/admin/materials/${m.id}/refetch`, { method: 'POST' }), onSuccess: refresh })
+  const refetch = useMutation({ mutationFn: () => api<Material>(`/admin/materials/${m.id}/refetch`, { method: 'POST' }), onSuccess: refresh })
   return (
     <li className="flex items-start gap-3 py-3">
       <input type="checkbox" className="mt-1 h-[18px] w-[18px] accent-[#2563eb]" checked={checked} onChange={onCheck} disabled={m.status !== 'active'} aria-label={`Select ${m.title}`} />
@@ -141,7 +141,12 @@ function MaterialRow({ m, checked, onCheck }: { m: Material; checked: boolean; o
       </div>
       <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row">
         {m.kind === 'url' && (
-          <button className="btn-ghost h-8 px-2" onClick={() => refetch.mutate()} disabled={refetch.isPending} title="Fetch the page again">
+          <button
+            className="btn-ghost h-8 px-2"
+            onClick={() => refetch.mutate()}
+            disabled={refetch.isPending}
+            aria-label="Fetch the page again"
+          >
             <Icon name="refresh" className="text-[18px]" />
           </button>
         )}
@@ -169,9 +174,9 @@ function AddMaterial() {
         form.append('module', f.module.trim())
         if (f.week_key) form.append('week_key', f.week_key)
         if (f.specialization) form.append('specialization', f.specialization)
-        return api('/admin/materials/upload', { method: 'POST', body: form })
+        return api<Material>('/admin/materials/upload', { method: 'POST', body: form })
       }
-      return api('/admin/materials', {
+      return api<Material>('/admin/materials', {
         method: 'POST',
         json: {
           title: f.title.trim(),
@@ -208,7 +213,7 @@ function AddMaterial() {
             key={m}
             type="button"
             onClick={() => setMode(m)}
-            className={`flex-1 rounded-md px-2 py-1.5 text-body-sm ${mode === m ? 'bg-white font-semibold text-ink shadow-card' : 'text-on-surface-variant'}`}
+            className={`flex-1 rounded-md px-2 py-1.5 text-body-sm ${mode === m ? 'bg-surface-container-lowest font-semibold text-ink shadow-card' : 'text-on-surface-variant'}`}
           >
             {m === 'text' ? 'Paste text' : m === 'url' ? 'From URL' : 'Upload file'}
           </button>

@@ -37,7 +37,7 @@ function Workspace({ ex }: { ex: ExerciseDetail }) {
     const t = window.setTimeout(async () => {
       setSaveState('saving')
       try {
-        await api(`/coding/exercises/${ex.id}/draft`, { method: 'PUT', json: { code } })
+        await api<void>(`/coding/exercises/${ex.id}/draft`, { method: 'PUT', json: { code } })
         lastSaved.current = code
         setSaveState('saved')
       } catch {
@@ -111,7 +111,7 @@ function Workspace({ ex }: { ex: ExerciseDetail }) {
 
         <section className="flex min-w-0 flex-col gap-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="flex items-center gap-2 text-body-sm text-on-surface-variant">
+            <span role="status" aria-live="polite" className="flex items-center gap-2 text-body-sm text-on-surface-variant">
               {runner.status === 'loading' && (
                 <>
                   <Spinner /> Loading {ex.language === 'python' ? 'Python' : 'the runner'}…
@@ -211,17 +211,22 @@ function AttemptCard({ a }: { a: CodeAttempt }) {
           ))}
         </ul>
       )}
-      <p className="label mt-3">AI feedback</p>
-      {a.grading_status === 'pending' ? (
-        <p className="mt-1 flex items-center gap-2 text-body-md text-on-surface-variant">
-          <Spinner /> Reviewing your code…
-        </p>
-      ) : (
-        <>
-          <p className={`mt-1 text-body-md ${a.grading_status === 'failed' ? 'text-on-surface-variant' : 'text-ink'}`}>{a.ai_feedback}</p>
-          {a.grading_status === 'done' && <AiModelBadge model={a.ai_model} className="mt-2" />}
-        </>
-      )}
+      <p className="label mt-3" id="ai-feedback-label">
+        AI feedback
+      </p>
+      {/* One live region around both states, so the swap from "Reviewing…" to the feedback speaks. */}
+      <div aria-live="polite" aria-labelledby="ai-feedback-label">
+        {a.grading_status === 'pending' ? (
+          <p className="mt-1 flex items-center gap-2 text-body-md text-on-surface-variant">
+            <Spinner /> Reviewing your code…
+          </p>
+        ) : (
+          <>
+            <p className={`mt-1 text-body-md ${a.grading_status === 'failed' ? 'text-on-surface-variant' : 'text-ink'}`}>{a.ai_feedback}</p>
+            {a.grading_status === 'done' && <AiModelBadge model={a.ai_model} className="mt-2" />}
+          </>
+        )}
+      </div>
     </div>
   )
 }

@@ -5,7 +5,7 @@ import { downloadCsv, initials } from '../lib/format'
 import { api } from '../lib/api'
 import { relativeTime, shortDate } from '../lib/dates'
 import { keys, useJobApplications, useJobFeed } from '../lib/queries'
-import { useSession } from '../lib/session'
+import { useSession } from '../lib/session-context'
 import type { ApplicationSource, ApplicationStatus, JobApplication } from '../lib/types'
 
 const COLUMNS: { status: ApplicationStatus; label: string; dot: string }[] = [
@@ -155,7 +155,7 @@ export default function JobsPage() {
         </div>
         <label className="flex items-center gap-2 font-mono text-label-sm text-on-surface-variant">
           Sort by:
-          <select className="rounded-md bg-white px-2 py-1 text-ink shadow-card" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)}>
+          <select className="rounded-md bg-surface-container-lowest px-2 py-1 text-ink shadow-card" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)}>
             <option value="recent">Recent activity</option>
             <option value="applied">Date applied</option>
           </select>
@@ -188,9 +188,9 @@ export default function JobsPage() {
                 <header className="flex items-center justify-between px-1">
                   <h2 className="flex items-center gap-2 font-semibold text-ink">
                     <span className={`h-2 w-2 rounded-full ${col.dot}`} /> {col.label}
-                    <span className="rounded-full bg-slate-100 px-2 font-mono text-label-sm text-slate-600">{items.length}</span>
+                    <span className="rounded-full bg-surface-container px-2 font-mono text-label-sm text-on-surface-variant">{items.length}</span>
                   </h2>
-                  <button className="rounded p-1 text-on-surface-variant hover:bg-white hover:text-ink" onClick={() => setEditing({ status: col.status })} aria-label={`Add to ${col.label}`}>
+                  <button className="rounded p-1 text-on-surface-variant hover:bg-surface-container-lowest hover:text-ink" onClick={() => setEditing({ status: col.status })} aria-label={`Add to ${col.label}`}>
                     <Icon name="add" className="text-[20px]" />
                   </button>
                 </header>
@@ -211,7 +211,7 @@ export default function JobsPage() {
         {feed.data?.length ? (
           <ul className="mt-3 flex flex-col gap-2">
             {feed.data.map((f, i) => (
-              <li key={i} className="flex items-center gap-3 rounded-xl bg-white/70 px-3 py-2">
+              <li key={i} className="flex items-center gap-3 rounded-xl bg-surface-container-lowest/70 px-3 py-2">
                 <Avatar name={f.name} id={f.user_id} size={30} />
                 <span className="min-w-0 flex-1 text-body-md text-ink">
                   <b>{f.name}</b> {f.status === 'offer' ? 'got an offer 🎉 from' : 'landed an interview with'} <b>{f.company}</b>
@@ -235,7 +235,7 @@ export default function JobsPage() {
 
 function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} className={`rounded-lg px-3 py-1.5 text-body-md transition-colors ${active ? 'bg-ink text-white' : 'bg-white text-on-surface-variant shadow-card hover:text-ink'}`}>
+    <button onClick={onClick} className={`rounded-lg px-3 py-1.5 text-body-md transition-colors ${active ? 'bg-ink text-white' : 'bg-surface-container-lowest text-on-surface-variant shadow-card hover:text-ink'}`}>
       {children}
     </button>
   )
@@ -251,7 +251,7 @@ function JobCard({ a, today, onEdit }: { a: JobApplication; today: string; onEdi
         e.dataTransfer.setData('text/plain', String(a.id))
         e.dataTransfer.effectAllowed = 'move'
       }}
-      className="group cursor-grab rounded-[10px] border border-slate-200 bg-white p-3 transition-shadow hover:shadow-lift active:cursor-grabbing"
+      className="group cursor-grab rounded-[10px] border border-outline-variant bg-surface-container-lowest p-3 transition-shadow hover:shadow-lift active:cursor-grabbing"
     >
       <div className="flex items-start gap-2.5">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-surface-container font-mono text-label-sm font-bold text-primary-container">
@@ -304,8 +304,8 @@ function JobForm({ initial, today, onClose, onSaved }: { initial: Partial<JobApp
     mutationFn: () => {
       const body = { ...form, notes: form.notes?.trim() || null, follow_up_date: form.follow_up_date || null }
       return initial.id
-        ? api(`/job-applications/${initial.id}`, { method: 'PATCH', json: body })
-        : api('/job-applications', { method: 'POST', json: body })
+        ? api<JobApplication>(`/job-applications/${initial.id}`, { method: 'PATCH', json: body })
+        : api<JobApplication>('/job-applications', { method: 'POST', json: body })
     },
     onSuccess: () => {
       onSaved()
@@ -313,7 +313,7 @@ function JobForm({ initial, today, onClose, onSaved }: { initial: Partial<JobApp
     },
   })
   const remove = useMutation({
-    mutationFn: () => api(`/job-applications/${initial.id}`, { method: 'DELETE' }),
+    mutationFn: () => api<void>(`/job-applications/${initial.id}`, { method: 'DELETE' }),
     onSuccess: () => {
       onSaved()
       onClose()

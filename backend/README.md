@@ -21,6 +21,34 @@ Demo data: on an **empty** database, `python -m scripts.seed_demo` creates a 9-p
 Tests: `pytest`. They use SQLite by default; set `DATABASE_URL` to run them against Postgres.
 **The tests drop and recreate every table in that database**, so point it at a throwaway one.
 
+### Run without Postgres (SQLite)
+
+The migrations are dialect-portable, so the whole app runs on SQLite. This is the quickest way to a working app
+with demo data when you have no Postgres or Neon connection string — only the `DATABASE_URL` changes:
+
+```bash
+cd backend
+python -m venv .venv && .venv/Scripts/activate      # or: source .venv/bin/activate
+python -m pip install -r requirements-dev.txt
+
+# Any SQLite file path works; the file is created on first use.
+set DATABASE_URL=sqlite:///./dev.db                 # macOS/Linux: export DATABASE_URL=sqlite:///./dev.db
+set JWT_SECRET=a-dev-secret-that-is-at-least-32-bytes
+set ADMIN_EMAILS=demo@classtrack.dev
+set SCHEDULER_ENABLED=false
+
+alembic upgrade head
+python -m scripts.seed_demo
+uvicorn app.main:app --reload
+```
+
+`dev.db` is already covered by this folder's `.gitignore` (`*.db`), so it will not be committed. The scheduler is
+off above because it is meant to run on exactly one instance; the nightly lag check and Friday Drop assume Postgres
+in production. SQLite is fine for development, not for production.
+
+> **Windows:** an Application Control policy can block `pip.exe` and `pytest.exe`. Use `python -m pip` and
+> `python -m pytest` instead.
+
 ## Layout
 
 ```

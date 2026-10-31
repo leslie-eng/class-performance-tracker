@@ -42,3 +42,6 @@ The mockups include things the backend doesn't have. Rather than show made-up nu
 - Weekly rank trend, "this week / this month" leaderboard tabs: no history is stored. The toggle is challenge vs. global.
 - Cohort percentiles, confidence, turnaround time, PDF export on the grading page: not produced by the grader. The page shows the real rubric scores, feedback, strengths and improvements.
 - Job cards: salary, interview times and tags aren't in the data model. Cards show source, dates, follow-ups and notes.
+- Heatmap hover tooltips, a heatmap "today" highlight, and a streak-milestone celebration: added, but none are in the mockups. The celebration fires only when the streak lands exactly on a bonus boundary (7, 14, 21 ...).
+- Streak and points numbers count up on load. All motion - this tween, the stat-card entrance, the score ring, the spinner - is wrapped by one `prefers-reduced-motion` rule in `src/index.css`, so the OS setting is respected everywhere without each component opting in.
+- Theme: the mockups are light only. The app ships a dark theme too (toggle in the user menu), driven by `--color-*` overrides on `.dark` rather than a second set of classes.
