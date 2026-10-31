@@ -4,6 +4,7 @@ import { api } from '../../lib/api'
 import { useCodeRunner } from '../../lib/runner/useCodeRunner'
 import type { AdminExercise, Material } from '../../lib/types'
 import { ErrorBanner, Icon, Spinner } from '../ui'
+import { AiModelBadge } from '../AiModelBadge'
 
 const listKey = ['admin', 'exercises'] as const
 
@@ -33,6 +34,7 @@ export function ExerciseReview() {
                   <span className="flex shrink-0 flex-col items-end gap-1">
                     <span className={`pill ${ex.status === 'published' ? 'bg-secondary-container text-on-secondary-container' : 'bg-primary-fixed text-primary-container'}`}>{ex.status}</span>
                     {!ex.tests_verified && <span className="pill bg-tertiary-fixed text-tertiary">tests unverified</span>}
+                    <AiModelBadge model={ex.ai_model} />
                   </span>
                 </button>
               </li>

@@ -49,6 +49,7 @@ class AttemptOut(BaseModel):
     ai_feedback: str | None
     points_awarded: int
     created_at: datetime
+    ai_model: str | None = None  # OpenRouter id of the model that produced the AI output
 
 
 class ExerciseOut(ExerciseSummary):
@@ -142,6 +143,7 @@ class AdminExerciseOut(BaseModel):
     reference_solution: str | None
     tests_verified: bool
     created_at: datetime
+    ai_model: str | None = None  # OpenRouter id of the model that produced the AI output
 
 
 class GenerateExercisesIn(BaseModel):

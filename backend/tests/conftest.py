@@ -6,14 +6,22 @@ _tmp = tempfile.mkdtemp()
 os.environ.setdefault("DATABASE_URL", f"sqlite:///{_tmp}/test.db")
 os.environ["SCHEDULER_ENABLED"] = "false"
 os.environ["ADMIN_EMAILS"] = "admin@example.com"
-os.environ["ANTHROPIC_API_KEY"] = "test-key"
+os.environ["OPENROUTER_API_KEY"] = "test-key"
+os.environ["LLM_STARTUP_CHECK"] = "false"  # no network calls from tests
 os.environ["JWT_SECRET"] = "test-secret-that-is-at-least-32-bytes"
+
+# Keep tests hermetic: never read a developer's real backend/.env (secrets, JOB_TOKEN, ...).
+from app.config import Settings  # noqa: E402
+
+Settings.model_config["env_file"] = None
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
 from app.db import Base, SessionLocal, engine  # noqa: E402
 from app.deps import today  # noqa: E402
+from app.llm import overrides  # noqa: E402
+from app.llm.ratelimit import limiter  # noqa: E402
 from app.main import app  # noqa: E402
 
 
@@ -21,6 +29,8 @@ from app.main import app  # noqa: E402
 def fresh_db():
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
+    limiter.reset()
+    overrides.clear_cache()
     yield
 
 

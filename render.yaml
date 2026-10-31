@@ -26,10 +26,14 @@ services:
         sync: false
       - key: CORS_ORIGINS # the frontend URL, e.g. https://classtrack-web.onrender.com
         sync: false
-      - key: ANTHROPIC_API_KEY # optional; AI grading is off without it
+      - key: OPENROUTER_API_KEY # optional; all AI features are off without it
         sync: false
-      - key: GRADING_MODEL
-        value: claude-opus-5-5
+      - key: LLM_DEFAULT_MODEL # friendly name from backend/app/llm/registry.py
+        value: luna
+      - key: LLM_TASK_MODELS
+        value: generation=gemini-flash
+      - key: LLM_FALLBACK_MODELS
+        value: mistral-small,gemini-flash
       - key: TIMEZONE # also moves "today" for streaks and the 8pm lag check
         value: Africa/Nairobi
       - key: ADMIN_CAN_VIEW_JOB_APPLICATIONS
@@ -57,8 +61,6 @@ services:
         value: first
       - key: SPECIALIZATIONS
         value: data_engineering,data_science,software_engineering,ai_engineering,embedded_iot,general
-      - key: QUIZ_MODEL # blank = GRADING_MODEL; a cheaper model works well for generation
-        sync: false
       - key: REQUIRE_QUIZ_REVIEW # true = generated quizzes wait for an admin to publish them
         value: "false"
       - key: FRONTEND_URL # links in WhatsApp messages, e.g. https://classtrack-web.onrender.com

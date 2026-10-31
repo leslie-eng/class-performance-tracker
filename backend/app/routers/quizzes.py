@@ -35,6 +35,7 @@ def attempt_out(attempt: QuizAttempt, late: bool = False) -> AttemptOut:
         grading_status=attempt.grading_status.value,
         grading_error=attempt.grading_error if submitted else None,
         results=attempt.per_question if submitted else None,  # answer keys only after submission
+        ai_model=attempt.ai_model if submitted else None,
     )
 
 

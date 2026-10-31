@@ -3,6 +3,7 @@ import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ClassNotesForm } from '../components/ClassNotesForm'
 import { EmptyState, ErrorBanner, Icon, Modal, PageLoader } from '../components/ui'
+import { AiModelBadge } from '../components/AiModelBadge'
 import { api } from '../lib/api'
 import { shortDate } from '../lib/dates'
 import { keys, useQuizLeaderboard, useWeekly } from '../lib/queries'
@@ -53,6 +54,7 @@ function Summary({ w }: { w: WeeklyCurrent }) {
       {b?.summary ? (
         <>
           <p className="mt-3 text-body-lg whitespace-pre-line text-ink">{b.summary}</p>
+          <AiModelBadge model={b.ai_model} className="mt-3" />
           {b.concepts.length > 0 && (
             <ul className="mt-5 grid gap-3 sm:grid-cols-2">
               {b.concepts.map((c) => (

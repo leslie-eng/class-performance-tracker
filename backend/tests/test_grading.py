@@ -2,12 +2,12 @@
 
 The rest of the suite mocks `grade_article`/`_parse` away (correctly — those are the network
 seams), which left the function bodies themselves uncovered. These exercise the real code with
-the two external edges — the URL fetch and the Claude call — stubbed.
+the two external edges — the URL fetch and the AI call (app.llm) — stubbed.
 """
 
-import anthropic
 import pytest
 
+from app import llm
 from app.config import get_settings
 from app.services import grading
 from app.services.grading import (
@@ -24,7 +24,7 @@ from tests.conftest import register
 
 
 def _patch_edges(monkeypatch, text="A short article body.", title="Decorators", parse_result=None):
-    """Replace the network edges of grade_article: the fetch and the Claude call."""
+    """Replace the network edges of grade_article: the fetch and the AI call."""
     monkeypatch.setattr(grading, "fetch_article", lambda url: (title, text))
     return _patch_parse(monkeypatch, parse_result)
 
@@ -32,8 +32,8 @@ def _patch_edges(monkeypatch, text="A short article body.", title="Decorators", 
 def _patch_parse(monkeypatch, result=None):
     captured: dict = {}
 
-    def fake(system, content, output_format, model=None):
-        captured.update(system=system, content=content, output_format=output_format)
+    def fake(system, content, output_format, task="grading"):
+        captured.update(system=system, content=content, output_format=output_format, task=task)
         return result
 
     monkeypatch.setattr(grading, "_parse", fake)
@@ -77,6 +77,7 @@ def test_grade_article_passes_title_and_url_into_the_prompt(monkeypatch):
     assert "Body text here." in captured["content"]
     assert "https://dev.to/x/post" in captured["content"]
     assert captured["output_format"] is ArticleGrade
+    assert captured["task"] == "grading"
 
 
 def test_grade_article_rejects_an_over_long_article(monkeypatch):
@@ -90,25 +91,46 @@ def test_grade_article_rejects_an_over_long_article(monkeypatch):
 # --- _parse ----------------------------------------------------------------
 
 
-def test_parse_raises_on_a_refusal(monkeypatch):
-    monkeypatch.setattr(grading, "_client", lambda: _FakeClient(stop_reason="refusal", parsed=None))
-
-    with pytest.raises(GradingError, match="declined"):
-        grading._parse(ARTICLE_SYSTEM, "x", ArticleGrade)
-
-
-def test_parse_raises_when_no_result_comes_back(monkeypatch):
-    monkeypatch.setattr(grading, "_client", lambda: _FakeClient(stop_reason="max_tokens", parsed=None))
-
-    with pytest.raises(GradingError, match="no result"):
-        grading._parse(ARTICLE_SYSTEM, "x", ArticleGrade)
-
-
-def test_parse_returns_the_parsed_output(monkeypatch):
+def test_parse_returns_the_parsed_output_and_records_the_model(monkeypatch):
     expected = _ok_grade()
-    monkeypatch.setattr(grading, "_client", lambda: _FakeClient(stop_reason="end_turn", parsed=expected))
+    service = _FakeService(parsed=expected)
+    monkeypatch.setattr(llm, "get_llm", lambda: service)
 
     assert grading._parse(ARTICLE_SYSTEM, "x", ArticleGrade) is expected
+    assert grading.take_last_model() == "openai/gpt-6-luna"
+    assert grading.take_last_model() is None  # taken once
+    [call] = service.calls
+    assert call["task"] == "grading" and call["output"] is ArticleGrade
+    assert call["messages"] == [{"role": "system", "content": ARTICLE_SYSTEM}, {"role": "user", "content": "x"}]
+
+
+def test_parse_passes_the_task_through(monkeypatch):
+    service = _FakeService(parsed=CodeReview(feedback="ok"))
+    monkeypatch.setattr(llm, "get_llm", lambda: service)
+
+    grading._parse(CODE_SYSTEM, "x", CodeReview, task="feedback")
+
+    assert service.calls[0]["task"] == "feedback"
+
+
+def test_parse_raises_a_readable_error_on_bad_output(monkeypatch):
+    """Invalid JSON after app.llm's own retry surfaces as a GradingError members can read."""
+    service = _FakeService(error=llm.LLMInvalidOutput("The AI returned an answer in the wrong format; try again"))
+    monkeypatch.setattr(llm, "get_llm", lambda: service)
+
+    with pytest.raises(GradingError, match="wrong format"):
+        grading._parse(ARTICLE_SYSTEM, "x", ArticleGrade)
+
+
+def test_parse_anonymises_member_names(client, monkeypatch):
+    register(client, "amina@example.com", "Amina Wanjiru")
+    service = _FakeService(parsed=_ok_grade())
+    monkeypatch.setattr(llm, "get_llm", lambda: service)
+
+    grading._parse(ARTICLE_SYSTEM, "Written by Amina Wanjiru", ArticleGrade)
+
+    anonymizer = service.calls[0]["anonymizer"]
+    assert anonymizer is not None and anonymizer.redact("Written by Amina Wanjiru") == "Written by Student A"
 
 
 # --- review_code -----------------------------------------------------------
@@ -120,6 +142,7 @@ def test_review_code_uses_the_daily_task_prompt_without_a_description(monkeypatc
     out = review_code("print(1)", "python")
 
     assert out == "Fine."
+    assert captured["task"] == "feedback"
     assert captured["system"] == CODE_SYSTEM
     assert captured["output_format"] is CodeReview
     assert "print(1)" in captured["content"]
@@ -141,7 +164,7 @@ def test_review_code_uses_the_exercise_prompt_and_includes_test_results(monkeypa
 def test_submission_fails_readably_when_no_api_key_is_configured(client, challenge, monkeypatch):
     """Without a key, articles must fail with a message an admin can act on, not a crash."""
     sub_id = _pending_article(client, challenge, monkeypatch)
-    monkeypatch.setattr(grading.get_settings(), "anthropic_api_key", None)
+    monkeypatch.setattr(grading.get_settings(), "openrouter_api_key", None)
 
     grading.grade_submission(sub_id)
 
@@ -155,7 +178,7 @@ def test_submission_survives_an_api_error(client, challenge, monkeypatch):
     sub_id = _pending_article(client, challenge, monkeypatch)
 
     def boom(url):
-        raise _FakeAPIError()
+        raise llm.LLMUnavailable("The AI service is busy or unavailable right now (HTTP 503); try again shortly", 503)
 
     monkeypatch.setattr(grading, "grade_article", boom)
 
@@ -163,7 +186,7 @@ def test_submission_survives_an_api_error(client, challenge, monkeypatch):
 
     row = _reload(sub_id)
     assert row.grading_status.value == "failed"
-    assert "Grading service error" in row.ai_feedback
+    assert "busy or unavailable" in row.ai_feedback
 
 
 def test_grade_submission_is_a_noop_for_an_already_graded_row(client, challenge, monkeypatch):
@@ -219,26 +242,15 @@ def _reload(submission_id: int):
         return db.get(Submission, submission_id)
 
 
-class _FakeAPIError(anthropic.APIError):
-    """Bypasses the SDK constructor (whose signature varies by version) but keeps isinstance()."""
+class _FakeService:
+    """Stands in for app.llm.LLMService: records each generate() call."""
 
-    def __init__(self):
-        Exception.__init__(self, "simulated API failure")
+    def __init__(self, parsed=None, error=None):
+        self.parsed, self.error, self.calls = parsed, error, []
 
-
-class _FakeResponse:
-    def __init__(self, stop_reason, parsed):
-        self.stop_reason = stop_reason
-        self.parsed_output = parsed
-
-
-class _FakeClient:
-    def __init__(self, stop_reason, parsed):
-        response = _FakeResponse(stop_reason, parsed)
-
-        class _Messages:
-            @staticmethod
-            def parse(**kwargs):
-                return response
-
-        self.beta = type("Beta", (), {"messages": _Messages()})()
+    def generate(self, task, messages, *, output=None, anonymizer=None, **kwargs):
+        self.calls.append({"task": task, "messages": messages, "output": output, "anonymizer": anonymizer})
+        if self.error:
+            raise self.error
+        return llm.LLMResult(text="{}", model_used="openai/gpt-6-luna", tokens_in=1, tokens_out=1,
+                             latency_ms=1, fallback_used=False, cost=None, parsed=self.parsed)

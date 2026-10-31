@@ -10,12 +10,11 @@ import logging
 import re
 from datetime import timedelta
 
-import anthropic
 from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.config import get_settings
+from app import llm
 from app.db import SessionLocal
 from app.models import CodeAttempt, CodingExercise, GradingStatus, utcnow
 from app.services import grading
@@ -78,15 +77,13 @@ def feedback_job(attempt_id: int) -> None:
         if hidden_total and attempt.verified:
             summary += f" This includes {hidden_total} hidden tests; don't speculate about what they check."
         try:
-            if not get_settings().anthropic_api_key:
+            if not llm.ai_configured():
                 raise grading.GradingError("AI feedback isn't configured on this server yet")
             attempt.ai_feedback = grading.review_code(attempt.code, ex.language, description=ex.description_md, test_summary=summary)
+            attempt.ai_model = grading.take_last_model()
             attempt.grading_status = GradingStatus.done
         except grading.GradingError as e:
             attempt.grading_status, attempt.ai_feedback = GradingStatus.failed, str(e)
-        except anthropic.APIError as e:
-            log.warning("Claude API error reviewing code attempt %s: %s", attempt_id, type(e).__name__)
-            attempt.grading_status, attempt.ai_feedback = GradingStatus.failed, f"Feedback service error ({type(e).__name__})"
         db.commit()
 
 
@@ -180,16 +177,16 @@ def validate_generated(ex: GenExercise, language: str) -> dict:
 
 def generate_exercises(source_text: str, language: str, count: int) -> tuple[list[dict], list[str]]:
     """Returns (valid exercise dicts, reasons for any that were dropped)."""
-    if not get_settings().anthropic_api_key:
+    if not llm.ai_configured():
         raise grading.GradingError("AI generation isn't configured on this server yet")
     out: GenExercises = grading._parse(
-        EXERCISE_GEN_SYSTEM.format(language=language, count=count), source_text, GenExercises,
-        model=get_settings().quiz_model_name,
+        EXERCISE_GEN_SYSTEM.format(language=language, count=count), source_text, GenExercises, task="generation",
     )
+    model = grading.take_last_model()
     valid, dropped = [], []
     for ex in out.exercises[:count]:
         try:
-            valid.append(validate_generated(ex, language))
+            valid.append({**validate_generated(ex, language), "ai_model": model})
         except ExerciseValidationError as e:
             dropped.append(f"{ex.title!r}: {e}")
     return valid, dropped

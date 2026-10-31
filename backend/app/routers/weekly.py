@@ -4,8 +4,9 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
-from app.config import get_settings
+from app import llm
 from app.deps import DB, CurrentUser
+from app.llm.ratelimit import Quota
 from app.models import (
     BriefStatus,
     ProjectPick,
@@ -41,7 +42,7 @@ def brief_out(brief: WeeklyBrief) -> BriefOut:
     return BriefOut(
         id=brief.id, week_key=brief.week_key, status=brief.status.value, summary=brief.summary,
         concepts=brief.concepts or [], summary_error=brief.summary_error,
-        has_notes=bool(brief.source_notes.strip()), updated_at=as_utc(brief.updated_at),
+        has_notes=bool(brief.source_notes.strip()), updated_at=as_utc(brief.updated_at), ai_model=brief.ai_model,
     )
 
 
@@ -63,7 +64,7 @@ def proposals_for(db: DB, week: date, user: User) -> list[ProposalOut]:
 
 
 def quiz_slots(db: DB, user: User, week: date, month: str) -> list[QuizSlot]:
-    ai = bool(get_settings().anthropic_api_key)
+    ai = llm.ai_configured()
     targets = [
         (QuizKind.weekly, week.isoformat(), None),
         (QuizKind.course, month, None),
@@ -117,7 +118,7 @@ def current_week(db: DB, user: CurrentUser):
         week_key=week,
         month_key=current_month_key(now),
         server_now=utcnow(),
-        ai_configured=bool(get_settings().anthropic_api_key),
+        ai_configured=llm.ai_configured(),
         brief=brief_out(brief) if brief else None,
         projects=proposals_for(db, week, user),
         my_pick=db.scalar(select(ProjectPick.proposal_id).where(ProjectPick.week_key == week, ProjectPick.user_id == user.id)),
@@ -140,7 +141,7 @@ def upcoming_brief(db: DB, _: CurrentUser):
 
 
 @router.put("/brief", response_model=BriefOut)
-def save_brief(body: BriefIn, db: DB, user: CurrentUser, background: BackgroundTasks):
+def save_brief(body: BriefIn, db: DB, user: CurrentUser, background: BackgroundTasks, quota: Quota):
     """Any member or admin can paste the class notes for the next drop."""
     week = upcoming_week_key()
     brief = db.scalar(select(WeeklyBrief).where(WeeklyBrief.week_key == week))
@@ -151,8 +152,12 @@ def save_brief(body: BriefIn, db: DB, user: CurrentUser, background: BackgroundT
         raise HTTPException(status.HTTP_409_CONFLICT, "This week's drop has already gone out")
     brief.source_notes = body.source_notes.strip()
     brief.summary, brief.concepts, brief.summary_error, brief.status = None, [], None, BriefStatus.draft
+    ai_now = quota.allow()
+    if not ai_now:
+        brief.summary_error = f"{quota.message} The notes are saved; an admin can regenerate the summary."
     db.commit()
-    background.add_task(summarize_brief_job, brief.id)
+    if ai_now:
+        background.add_task(summarize_brief_job, brief.id)
     return brief_out(brief)
 
 

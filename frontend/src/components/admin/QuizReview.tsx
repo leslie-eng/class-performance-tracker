@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { api } from '../../lib/api'
 import type { AdminQuestion, AdminQuiz, AdminQuizDetail } from '../../lib/types'
 import { ErrorBanner, Icon, Spinner } from '../ui'
+import { AiModelBadge } from '../AiModelBadge'
 
 const STATUS_CLS: Record<AdminQuiz['status'], string> = {
   published: 'bg-secondary-container text-on-secondary-container',
@@ -47,7 +48,10 @@ export function QuizReview() {
                     {q.question_count} questions · {q.attempts} attempts · {q.sources.length ? `${q.sources.length} materials` : 'notes/summaries only'}
                   </span>
                 </span>
-                <span className={`pill shrink-0 ${STATUS_CLS[q.status]}`}>{q.status}</span>
+                <span className="flex shrink-0 flex-col items-end gap-1">
+                  <span className={`pill ${STATUS_CLS[q.status]}`}>{q.status}</span>
+                  <AiModelBadge model={q.ai_model} />
+                </span>
               </button>
             </li>
           ))}

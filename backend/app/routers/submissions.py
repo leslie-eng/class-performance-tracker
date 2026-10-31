@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app.deps import DB, CurrentUser, today
+from app.llm.ratelimit import Quota
 from app.models import Enrollment, GradingStatus, Submission, SubmissionType, TaskTypes, User
 from app.routers.challenges import get_challenge_or_404
 from app.schemas import SubmissionIn, SubmissionOut
@@ -20,7 +21,7 @@ def get_submission_for(db: DB, submission_id: int, user: User) -> Submission:
 
 
 @router.post("", response_model=SubmissionOut, status_code=status.HTTP_201_CREATED)
-def create_submission(body: SubmissionIn, db: DB, user: CurrentUser, background: BackgroundTasks):
+def create_submission(body: SubmissionIn, db: DB, user: CurrentUser, background: BackgroundTasks, quota: Quota):
     challenge = get_challenge_or_404(db, body.challenge_id)
     enrollment = db.scalar(
         select(Enrollment).where(Enrollment.challenge_id == challenge.id, Enrollment.user_id == user.id)
@@ -47,6 +48,8 @@ def create_submission(body: SubmissionIn, db: DB, user: CurrentUser, background:
         )
 
     needs_ai = body.submission_type == SubmissionType.article or rules["ai_code_review"]
+    # Over the AI limit, the task is still saved (streaks are safe); only grading waits for a retry.
+    ai_now = needs_ai and quota.allow()
     fields = dict(
         enrollment_id=enrollment.id,
         day_number=day,
@@ -54,7 +57,9 @@ def create_submission(body: SubmissionIn, db: DB, user: CurrentUser, background:
         content=body.content,
         language=body.language,
         problem_link=str(body.problem_link) if body.problem_link else None,
-        grading_status=GradingStatus.pending if needs_ai else GradingStatus.not_applicable,
+        grading_status=(GradingStatus.pending if ai_now else GradingStatus.failed) if needs_ai
+        else GradingStatus.not_applicable,
+        ai_feedback=None if ai_now or not needs_ai else f"{quota.message} Your task is saved; retry grading then.",
     )
     # The first submission for a day counts toward the streak; later ones are kept
     # (and still get AI feedback) but earn no points. A partial unique index
@@ -78,7 +83,7 @@ def create_submission(body: SubmissionIn, db: DB, user: CurrentUser, background:
 
     recompute_enrollment(db, enrollment, today())
     db.commit()
-    if needs_ai:
+    if ai_now:
         background.add_task(grade_submission, sub.id)
     return sub
 
@@ -105,10 +110,11 @@ def get_submission(submission_id: int, db: DB, user: CurrentUser):
 
 
 @router.post("/{submission_id}/regrade", response_model=SubmissionOut)
-def regrade(submission_id: int, db: DB, user: CurrentUser, background: BackgroundTasks):
+def regrade(submission_id: int, db: DB, user: CurrentUser, background: BackgroundTasks, quota: Quota):
     sub = get_submission_for(db, submission_id, user)
     if sub.grading_status != GradingStatus.failed:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Only failed gradings can be retried")
+    quota.take()
     sub.grading_status = GradingStatus.pending
     sub.ai_feedback = None
     db.commit()

@@ -8,6 +8,7 @@ from sqlalchemy import case, func, select
 from sqlalchemy.exc import IntegrityError
 
 from app.deps import DB, AdminUser, CurrentUser
+from app.llm.ratelimit import Quota
 from app.models import (
     CodeAttempt,
     CodeDraft,
@@ -46,7 +47,7 @@ def attempt_out(a: CodeAttempt) -> AttemptOut:
         id=a.id, exercise_id=a.exercise_id, passed_count=a.passed_count, total_count=a.total_count,
         runner=a.runner.value, verified=a.verified, results=a.results, runner_error=a.runner_error,
         grading_status=a.grading_status.value, ai_feedback=a.ai_feedback, points_awarded=a.points_awarded,
-        created_at=as_utc(a.created_at),
+        created_at=as_utc(a.created_at), ai_model=a.ai_model,
     )
 
 
@@ -131,7 +132,7 @@ def save_draft(exercise_id: int, body: DraftIn, db: DB, user: CurrentUser):
 
 
 @router.post("/coding/exercises/{exercise_id}/submit", response_model=AttemptOut, status_code=status.HTTP_201_CREATED)
-def submit(exercise_id: int, body: SubmitIn, db: DB, user: CurrentUser, background: BackgroundTasks):
+def submit(exercise_id: int, body: SubmitIn, db: DB, user: CurrentUser, background: BackgroundTasks, quota: Quota):
     ex = published(db, exercise_id)
     if coding.rate_limited(db, user.id):
         raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Too many submissions; wait a minute and try again")
@@ -157,10 +158,14 @@ def submit(exercise_id: int, body: SubmitIn, db: DB, user: CurrentUser, backgrou
 
     full = attempt.total_count > 0 and attempt.passed_count == attempt.total_count
     attempt.points_awarded = coding.points_for(db, ex, user.id, full, attempt.verified)
-    attempt.grading_status = GradingStatus.pending
+    ai_now = quota.allow()
+    attempt.grading_status = GradingStatus.pending if ai_now else GradingStatus.failed
+    if not ai_now:
+        attempt.ai_feedback = f"{quota.message} Your attempt and points are saved."
     db.add(attempt)
     db.commit()
-    background.add_task(coding.feedback_job, attempt.id)
+    if ai_now:
+        background.add_task(coding.feedback_job, attempt.id)
     return attempt_out(attempt)
 
 
@@ -180,7 +185,7 @@ def admin_out(ex: CodingExercise) -> AdminExerciseOut:
         entrypoint=ex.entrypoint, tests=ex.tests, difficulty=ex.difficulty, points=ex.points, module=ex.module,
         week_key=ex.week_key, material_id=ex.material_id, time_limit_seconds=ex.time_limit_seconds,
         status=ex.status.value, reference_solution=ex.reference_solution, tests_verified=ex.tests_verified,
-        created_at=as_utc(ex.created_at),
+        created_at=as_utc(ex.created_at), ai_model=ex.ai_model,
     )
 
 
@@ -274,11 +279,12 @@ def admin_verify(exercise_id: int, body: VerifyIn, db: DB, _: AdminUser):
 
 
 @router.post("/admin/exercises/generate", response_model=dict)
-def admin_generate(body: GenerateExercisesIn, db: DB, admin: AdminUser):
+def admin_generate(body: GenerateExercisesIn, db: DB, admin: AdminUser, quota: Quota):
     """Draft exercises from chosen materials. Drafts always need review and publishing."""
     text, ids = materials.context_from_ids(db, body.material_ids)
     if not text:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "None of those materials are active")
+    quota.take()
     try:
         generated, dropped = coding.generate_exercises(text, body.language, body.count)
     except grading.GradingError as e:

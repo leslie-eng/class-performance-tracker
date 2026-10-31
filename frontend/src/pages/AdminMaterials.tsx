@@ -3,6 +3,7 @@ import { useState, type FormEvent } from 'react'
 import { ExerciseReview } from '../components/admin/ExerciseReview'
 import { QuizReview } from '../components/admin/QuizReview'
 import { ErrorBanner, Icon } from '../components/ui'
+import { AiModelBadge } from '../components/AiModelBadge'
 import { api } from '../lib/api'
 import { shortDate } from '../lib/dates'
 import { useSession } from '../lib/session-context'
@@ -126,7 +127,10 @@ function MaterialRow({ m, checked, onCheck }: { m: Material; checked: boolean; o
         </p>
         <p className="mt-0.5 text-body-sm">
           {m.digest_ready ? (
-            <span className="text-secondary">Digest ready</span>
+            <span className="inline-flex flex-wrap items-center gap-2">
+              <span className="text-secondary">Digest ready</span>
+              <AiModelBadge model={m.ai_model} />
+            </span>
           ) : m.digest_error ? (
             <span className="text-error">{m.digest_error}</span>
           ) : (

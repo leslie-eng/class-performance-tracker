@@ -10,6 +10,5 @@ bcrypt>=4.2
 python-multipart>=0.0.20
 httpx>=0.28
 beautifulsoup4>=4.12
-anthropic>=1.8
 apscheduler>=3.11,<4
 pypdf>=6.0
