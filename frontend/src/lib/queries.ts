@@ -149,6 +149,8 @@ export const useUnreadCount = () =>
     queryKey: keys.unread,
     queryFn: () => api<{ unread: number }>('/inbox/unread-count'),
     refetchInterval: 60_000,
+    // A badge that fails to refresh (API waking up, or mid-deploy) shouldn't pop an error every minute.
+    meta: { silent: true },
   })
 
 export const useInbox = (enabled: boolean) =>

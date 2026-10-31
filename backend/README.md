@@ -108,6 +108,15 @@ alembic/             migrations
 | PUT | `/admin/llm/tasks/{task}` | admin | Set a task's model live (`{"model": "mistral-small"}`; `null` = back to env) |
 | POST | `/admin/llm/test` | admin | Send a sample prompt to one model: reply, latency, tokens, cost |
 | GET | `/admin/llm/usage?days=30` | admin | Calls, errors, fallbacks, tokens, cost and latency per model and task |
+| POST | `/challenges/proposals` | member | Propose a challenge; saved as `pending` (not listed or joinable). Admins are notified |
+| GET | `/challenges/proposals/mine` | member | My proposals in every status, with the rejection reason |
+| PATCH | `/challenges/proposals/{id}` | creator | Edit, only while pending |
+| POST | `/challenges/proposals/{id}/cancel` | creator | Withdraw, only while pending |
+| GET | `/admin/challenges?status=pending&q=&limit=&offset=` | admin | Approval queue (any status or `all`), paged |
+| GET | `/admin/challenges/{id}` | admin | One challenge with its audit trail (creator, reviewer, when, note) |
+| POST | `/admin/challenges/{id}/approve` / `reject` | admin | Approve (optional note) or reject (reason required). 409 if already reviewed |
+| GET | `/inbox`, `/inbox/unread-count` | member | My in-app notifications (the bell) |
+| POST | `/inbox/{id}/read`, `/inbox/read-all` | member | Mark notifications read |
 | GET | `/meta` | anyone | Server timezone and today's date (for the deadline countdown) |
 
 ## Scoring

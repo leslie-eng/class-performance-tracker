@@ -262,3 +262,42 @@ for it to boot (often close to a minute). With AI:
   choices are re-read from the database.
 - The external cron that wakes the API for the Friday Drop ([above](#waking-the-api-for-the-friday-drop)) also
   gives quiz generation a warm server.
+
+## Challenge approvals
+
+Members propose challenges (`/challenges/proposals`); they stay `pending`, unlisted and not joinable, until an admin
+approves them at **/admin/challenges**. Status rules live in `backend/app/services/challenge_review.py`; admins and
+members are notified in the app (the bell), through `backend/app/services/inbox.py`.
+
+### Deploying it
+
+- **No new environment variables.**
+- **Migration `c8166f6654fb`** runs automatically: the API's start command is `alembic upgrade head && uvicorn …`,
+  so it runs once when the new API instance starts, before it serves traffic. There's nothing to run by hand (and the
+  free plan has no shell).
+  - It adds `status`, `created_by`, `updated_at`, `reviewed_by`, `reviewed_at`, `review_note` to `challenges` and
+    creates `inbox_messages`. Every existing challenge becomes `approved`, so nothing that's live disappears.
+  - It's safe while the old API is still serving during the switch-over: old code never reads the new columns, and a
+    challenge it creates gets the database default `approved` (only admins could create challenges before).
+- **Order:** merge and deploy after the OpenRouter work (pull request #4); this branch's migration follows its two.
+  Render deploys the API and the static site from the same commit; the site is usually live a few minutes before the
+  API. In that window the new pages get 404s from the old API (the bell's badge stays quiet; the proposal pages show an
+  error until the API is up). Deploying in a quiet hour is enough.
+- **Before the first deploy, take a Neon backup branch** (Neon console > Branches > Create branch from `main`). It's
+  instant and free, and makes rollback a restore rather than a migration.
+
+### Rolling back
+
+- **Code only (redeploy the previous commit):** the old code ignores the new columns, *but it lists every challenge*,
+  so pending, rejected and cancelled proposals would show up as normal challenges members can join. Avoid this unless
+  there are no proposals yet.
+- **Code and schema:** `alembic downgrade f233d4c326a4` deletes every non-approved proposal (so they can't go live),
+  then drops the new columns and the inbox. Approved challenges and their data are kept. Or restore the Neon backup
+  branch.
+
+### After deploying: smoke test
+
+Sign in as a member and as an admin (an `ADMIN_EMAILS` address) and run the end-to-end checklist in the pull request:
+propose → admin sees it in the bell and the queue → reject with a reason → member sees the reason → propose, edit,
+approve with a note → member joins from /join → the detail page shows who approved it, when and why.
+
