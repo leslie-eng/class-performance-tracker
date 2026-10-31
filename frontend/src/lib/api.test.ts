@@ -1,4 +1,4 @@
-import { apiBase, errorMessage } from './api'
+import { apiBase, errorMessage, nonJsonMessage, pointsAtFrontend } from './api'
 
 describe('apiBase', () => {
     it('falls back to the dev proxy when unset or blank', () => {
@@ -75,3 +75,33 @@ describe('errorMessage', () => {
     })
 })
 
+
+describe('pointsAtFrontend', () => {
+    const site = 'https://classtrack-web.onrender.com'
+
+    it('is true for the dev proxy and for the site itself', () => {
+        expect(pointsAtFrontend('/api', site)).toBe(true)
+        expect(pointsAtFrontend(site, site)).toBe(true)
+    })
+
+    it('is false for a separate API host', () => {
+        expect(pointsAtFrontend('https://class-performance-tracker.onrender.com', site)).toBe(false)
+        expect(pointsAtFrontend('http://localhost:8000', 'http://localhost:5173')).toBe(false)
+    })
+})
+
+describe('nonJsonMessage', () => {
+    const site = 'https://classtrack-web.onrender.com'
+
+    it('blames VITE_API_URL only when it points at the frontend', () => {
+        expect(nonJsonMessage('/api', site)).toMatch(/VITE_API_URL is probably unset/)
+    })
+
+    // A separate API host answering with HTML is a sleeping free-tier instance waking up,
+    // not a misconfiguration: telling people to change VITE_API_URL sent them the wrong way.
+    it('says a separate API is probably starting up', () => {
+        const msg = nonJsonMessage('https://class-performance-tracker.onrender.com', site)
+        expect(msg).toMatch(/probably still starting up/)
+        expect(msg).not.toMatch(/VITE_API_URL/)
+    })
+})
