@@ -6,7 +6,7 @@ import { ErrorBanner, Icon, PageLoader } from '../components/ui'
 import { api } from '../lib/api'
 import { dateForDay, dayNumber, formatCountdown, relativeTime, shortDate } from '../lib/dates'
 import { useInvalidateProgress, useLeaderboard, useMySubmissions } from '../lib/queries'
-import { useSession } from '../lib/session'
+import { useSession } from '../lib/session-context'
 import { LANGUAGES, articleHost } from '../lib/submissions'
 import type { Submission, SubmissionType } from '../lib/types'
 import { useCountdown } from '../lib/useCountdown'
@@ -199,7 +199,7 @@ export default function SubmitPage() {
                 aria-selected={type === t}
                 disabled={disabled}
                 onClick={() => update({ type: t })}
-                className={`flex items-center gap-2 rounded-lg px-4 py-2 font-mono text-label-md transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${type === t ? 'bg-white text-primary-container shadow-card' : 'text-on-surface-variant hover:text-ink'}`}
+                className={`flex items-center gap-2 rounded-lg px-4 py-2 font-mono text-label-md transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${type === t ? 'bg-surface-container-lowest text-primary-container shadow-card' : 'text-on-surface-variant hover:text-ink'}`}
               >
                 <Icon name={t === 'code' ? 'terminal' : 'article'} className="text-[18px]" />
                 {t === 'code' ? 'Code Submission' : 'Article'}
@@ -288,7 +288,7 @@ export default function SubmitPage() {
 
       <ErrorBanner error={submit.error} />
 
-      <div className="flex flex-col gap-3 border-t border-slate-200 pt-6 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-3 border-t border-outline-variant pt-6 md:flex-row md:items-center md:justify-between">
         <button
           type="button"
           className="btn-ghost"
@@ -357,7 +357,7 @@ function CodeEditor({
           <span className="h-3 w-3 rounded-full bg-[#f59e0b]" />
           <span className="h-3 w-3 rounded-full bg-[#10b981]" />
         </span>
-        <span className="rounded-md bg-white/5 px-3 py-1 font-mono text-label-md text-slate-200">{filename}</span>
+        <span className="rounded-md bg-surface-container-lowest/5 px-3 py-1 font-mono text-label-md text-slate-200">{filename}</span>
       </div>
       <div className="flex max-h-[520px] min-h-[320px] overflow-hidden">
         <div ref={gutter} aria-hidden className="w-12 shrink-0 overflow-hidden py-4 pr-3 text-right font-mono text-label-md leading-[22px] text-[#475569] select-none">
@@ -367,7 +367,7 @@ function CodeEditor({
         </div>
         <textarea
           aria-label="Code"
-          className="min-h-[320px] flex-1 resize-none bg-transparent py-4 pr-4 font-mono text-label-md leading-[22px] whitespace-pre text-[#f8fafc] caret-[#60a5fa] outline-none placeholder:text-slate-600"
+          className="min-h-[320px] flex-1 resize-none bg-transparent py-4 pr-4 font-mono text-label-md leading-[22px] whitespace-pre text-[#f8fafc] caret-[#60a5fa] outline-none placeholder:text-on-surface-variant"
           spellCheck={false}
           value={value}
           placeholder={'# Paste or write your solution for today\n'}
@@ -383,7 +383,7 @@ function CodeEditor({
           }}
         />
       </div>
-      <div className="flex items-center justify-between border-t border-white/5 bg-[#1e293b] px-4 py-2 font-mono text-label-sm text-slate-400">
+      <div className="flex items-center justify-between border-t border-white/5 bg-[#1e293b] px-4 py-2 font-mono text-label-sm text-outline">
         <span className="flex items-center gap-4">
           <span className="flex items-center gap-1.5 text-[#4ade80]">
             <span className="h-1.5 w-1.5 rounded-full bg-[#4ade80]" /> {language}
