@@ -30,6 +30,8 @@ export function emptyProposal(today: string): ProposalInput {
   return { name: '', description: '', start_date: addDays(today, 1), end_date: addDays(today, 30), task_types_allowed: 'both' }
 }
 
+export const TASK_LABELS = { both: 'code + articles', code: 'code only', article: 'articles only' } as const
+
 export const STATUS_BADGE: Record<ChallengeStatus, { label: string; icon: string; className: string }> = {
   pending: { label: 'Pending review', icon: 'hourglass_top', className: 'bg-tertiary-fixed text-tertiary' },
   approved: { label: 'Approved', icon: 'check_circle', className: 'bg-secondary-container text-on-secondary-container' },

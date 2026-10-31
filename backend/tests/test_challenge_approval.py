@@ -194,3 +194,23 @@ def test_lag_check_ignores_proposals(client, pending, db):
     db.get(Challenge, pending["id"]).start_date = today() - timedelta(days=5)
     db.commit()
     assert all(c.id != pending["id"] for c in active_challenges(db, today()))
+
+
+def test_audit_detail_for_a_challenge_from_before_approvals(client, admin, db):
+    """Rows the migration backfilled: approved, with no creator or reviewer recorded."""
+    old = Challenge(name="Legacy challenge", start_date=today(), end_date=today() + timedelta(days=9),
+                    scoring_rules={}, status=ChallengeStatus.approved)
+    db.add(old)
+    db.commit()
+    detail = client.get(f"/admin/challenges/{old.id}", headers=admin).json()
+    assert detail["status"] == "approved" and detail["creator"] is None and detail["reviewer"] is None
+    assert detail["reviewed_at"] is None and detail["enrolled"] == 0
+    assert client.get("/admin/challenges/999999", headers=admin).status_code == 404
+
+
+def test_audit_trail_records_who_when_and_why(client, admin, member, pending):
+    cid = pending["id"]
+    client.post(f"/admin/challenges/{cid}/reject", headers=admin, json={"note": "Too close to exams"})
+    detail = client.get(f"/admin/challenges/{cid}", headers=admin).json()
+    assert detail["creator"]["name"] == "Amina" and detail["reviewer"]["name"] == "Admin"
+    assert detail["review_note"] == "Too close to exams" and detail["reviewed_at"] >= detail["created_at"]

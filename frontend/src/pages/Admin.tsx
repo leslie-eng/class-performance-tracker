@@ -166,7 +166,9 @@ function ChallengeList() {
                 {c.start_date} → {c.end_date} · {c.total_days} days · {c.task_types_allowed}
               </p>
             </div>
-            <span className="font-mono text-label-sm text-on-surface-variant">#{c.id}</span>
+            <Link to={`/admin/challenges/${c.id}`} className="font-mono text-label-sm text-primary-container hover:underline" aria-label={`Details and audit trail for ${c.name}`}>
+              #{c.id}
+            </Link>
           </li>
         ))}
         {!challenges.data?.length && <li className="py-3 text-body-md text-on-surface-variant">No challenges yet.</li>}

@@ -5,6 +5,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { PageLoader } from './components/ui'
 import { useSession } from './lib/session-context'
 import AdminPage from './pages/Admin'
+import AdminChallengeDetailPage from './pages/AdminChallengeDetail'
 import AdminChallengesPage from './pages/AdminChallenges'
 import AdminMaterialsPage from './pages/AdminMaterials'
 import CodePage from './pages/Code'
@@ -81,6 +82,7 @@ export default function App() {
           <Route path="/admin" element={<RequireAdmin><AdminPage /></RequireAdmin>} />
           <Route path="/admin/materials" element={<RequireAdmin><AdminMaterialsPage /></RequireAdmin>} />
           <Route path="/admin/challenges" element={<RequireAdmin><AdminChallengesPage /></RequireAdmin>} />
+          <Route path="/admin/challenges/:id" element={<RequireAdmin><AdminChallengeDetailPage /></RequireAdmin>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

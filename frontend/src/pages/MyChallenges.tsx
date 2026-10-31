@@ -5,13 +5,11 @@ import { ChallengeStatusBadge } from '../components/ChallengeStatusBadge'
 import { ProposalForm } from '../components/ProposalForm'
 import { EmptyState, ErrorBanner, Icon, Modal, PageLoader } from '../components/ui'
 import { api } from '../lib/api'
-import { canEditOrCancel, emptyProposal } from '../lib/challenges'
+import { canEditOrCancel, emptyProposal, TASK_LABELS } from '../lib/challenges'
 import { relativeTime, shortDate } from '../lib/dates'
 import { keys, useMyProposals } from '../lib/queries'
 import { useSession } from '../lib/session-context'
 import type { Proposal, ProposalInput } from '../lib/types'
-
-const TASKS = { both: 'code + articles', code: 'code only', article: 'articles only' } as const
 
 function changed(p: Proposal, v: ProposalInput): Partial<ProposalInput> {
   const out: Partial<ProposalInput> = {}
@@ -97,7 +95,7 @@ export default function MyChallengesPage() {
               {p.description && <p className="text-body-md text-on-surface-variant">{p.description}</p>}
               <p className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-label-sm text-on-surface-variant">
                 <span>{shortDate(p.start_date)} → {shortDate(p.end_date)} · {p.total_days} days</span>
-                <span>{TASKS[p.task_types_allowed]}</span>
+                <span>{TASK_LABELS[p.task_types_allowed]}</span>
                 <span>proposed {relativeTime(p.created_at)}</span>
               </p>
               {p.status === 'rejected' && p.review_note && (
