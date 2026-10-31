@@ -10,7 +10,8 @@ import { SessionProvider } from './lib/session'
 import './index.css'
 
 const queryClient = new QueryClient({
-  queryCache: new QueryCache({ onError: reportQueryError }),
+  // Background polls marked meta.silent (e.g. the bell badge) fail quietly instead of raising the error toast.
+  queryCache: new QueryCache({ onError: (err, query) => query.meta?.silent || reportQueryError(err) }),
   defaultOptions: {
     queries: {
       staleTime: 30_000,

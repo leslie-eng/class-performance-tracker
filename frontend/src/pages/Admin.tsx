@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { ClassNotesForm } from '../components/ClassNotesForm'
 import { AIModels } from '../components/admin/AIModels'
 import { Avatar, ErrorBanner, Icon } from '../components/ui'
@@ -25,6 +26,9 @@ export default function AdminPage() {
       <div>
         <h1 className="text-headline-lg text-ink md:text-[28px]">Admin</h1>
         <p className="text-body-md text-on-surface-variant">Manage challenges, members, the Friday Drop, WhatsApp nudges and AI models.</p>
+        <Link to="/admin/challenges" className="btn-secondary mt-3 w-fit">
+          <Icon name="fact_check" className="text-[18px]" /> Review proposed challenges
+        </Link>
       </div>
       <div className="grid gap-6 xl:grid-cols-2">
         <CreateChallenge />
@@ -162,7 +166,9 @@ function ChallengeList() {
                 {c.start_date} → {c.end_date} · {c.total_days} days · {c.task_types_allowed}
               </p>
             </div>
-            <span className="font-mono text-label-sm text-on-surface-variant">#{c.id}</span>
+            <Link to={`/admin/challenges/${c.id}`} className="font-mono text-label-sm text-primary-container hover:underline" aria-label={`Details and audit trail for ${c.name}`}>
+              #{c.id}
+            </Link>
           </li>
         ))}
         {!challenges.data?.length && <li className="py-3 text-body-md text-on-surface-variant">No challenges yet.</li>}

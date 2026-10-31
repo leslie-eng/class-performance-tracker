@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.deps import DB, CurrentUser
-from app.routers.challenges import get_challenge_or_404
+from app.routers.challenges import visible_challenge_or_404
 from app.schemas import LeaderboardRow
 from app.services.leaderboard import challenge_leaderboard, global_leaderboard
 
@@ -14,6 +14,6 @@ def global_board(db: DB, _: CurrentUser):
 
 
 @router.get("/{challenge_id}", response_model=list[LeaderboardRow])
-def challenge_board(challenge_id: int, db: DB, _: CurrentUser):
-    get_challenge_or_404(db, challenge_id)
+def challenge_board(challenge_id: int, db: DB, user: CurrentUser):
+    visible_challenge_or_404(db, challenge_id, user)
     return challenge_leaderboard(db, challenge_id)
