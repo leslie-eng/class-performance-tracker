@@ -40,6 +40,7 @@ export interface Challenge {
   task_types_allowed: TaskTypes
   scoring_rules: Partial<ScoringRules>
   effective_rules: ScoringRules
+  status?: ChallengeStatus
 }
 
 export interface Enrollment {
@@ -460,4 +461,58 @@ export interface LLMUsage {
   totals: { calls: number; errors: number; cost: number; tokens_in: number; tokens_out: number }
   by_model: LLMUsageGroup[]
   by_task: LLMUsageGroup[]
+}
+
+export type ChallengeStatus = 'pending' | 'approved' | 'rejected' | 'cancelled'
+
+/** A challenge a member proposed, as its creator (and admins) see it. */
+export interface Proposal extends Challenge {
+  status: ChallengeStatus
+  created_at: string
+  updated_at: string
+  reviewed_at: string | null
+  review_note: string | null // approval note, or the reason for a rejection
+}
+
+export interface PersonRef {
+  id: number
+  name: string
+}
+
+/** Admin view: adds the audit trail. */
+export interface AdminChallenge extends Proposal {
+  creator: PersonRef | null
+  reviewer: PersonRef | null
+  enrolled: number
+}
+
+export interface AdminChallengePage {
+  items: AdminChallenge[]
+  total: number
+  limit: number
+  offset: number
+}
+
+export interface ProposalInput {
+  name: string
+  description: string | null
+  start_date: string
+  end_date: string
+  task_types_allowed: TaskTypes
+}
+
+export interface InboxItem {
+  id: number
+  event: string
+  title: string
+  body: string
+  link: string | null
+  challenge_id: number | null
+  created_at: string
+  read_at: string | null
+}
+
+export interface InboxPage {
+  items: InboxItem[]
+  unread: number
 }

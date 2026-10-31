@@ -5,6 +5,7 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 import { PageLoader } from './components/ui'
 import { useSession } from './lib/session-context'
 import AdminPage from './pages/Admin'
+import AdminChallengesPage from './pages/AdminChallenges'
 import AdminMaterialsPage from './pages/AdminMaterials'
 import CodePage from './pages/Code'
 import DashboardPage from './pages/Dashboard'
@@ -13,6 +14,7 @@ import JobsPage from './pages/Jobs'
 import JoinPage from './pages/Join'
 import LeaderboardPage from './pages/Leaderboard'
 import LoginPage from './pages/Login'
+import MyChallengesPage from './pages/MyChallenges'
 import QuizRunnerPage from './pages/QuizRunner'
 import SettingsPage from './pages/Settings'
 import SubmitPage from './pages/Submit'
@@ -74,9 +76,11 @@ export default function App() {
             }
           />
           <Route path="/join" element={<JoinPage />} />
+          <Route path="/challenges/proposals" element={<MyChallengesPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/admin" element={<RequireAdmin><AdminPage /></RequireAdmin>} />
           <Route path="/admin/materials" element={<RequireAdmin><AdminMaterialsPage /></RequireAdmin>} />
+          <Route path="/admin/challenges" element={<RequireAdmin><AdminChallengesPage /></RequireAdmin>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

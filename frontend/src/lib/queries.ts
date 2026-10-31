@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from './api'
 import type {
   Challenge,
+  InboxPage,
+  Proposal,
   CodeAttempt,
   ExerciseDetail,
   ExerciseSummary,
@@ -35,6 +37,10 @@ export const keys = {
   exercises: ['exercises'] as const,
   exercise: (id: number) => ['exercises', id] as const,
   codeAttempt: (id: number) => ['code-attempt', id] as const,
+  proposals: ['challenges', 'proposals'] as const,
+  adminChallenges: ['admin', 'challenges'] as const,
+  inbox: ['inbox'] as const,
+  unread: ['inbox', 'unread'] as const,
 }
 
 export const useMe = (enabled = true) =>
@@ -133,3 +139,17 @@ export const useCodeAttempt = (id: number | undefined) =>
     enabled: !!id,
     refetchInterval: (q) => (q.state.data?.grading_status === 'pending' ? 3000 : false),
   })
+
+export const useMyProposals = () =>
+  useQuery({ queryKey: keys.proposals, queryFn: () => api<Proposal[]>('/challenges/proposals/mine') })
+
+/** Bell badge: cheap count, refreshed every minute and when the tab regains focus. */
+export const useUnreadCount = () =>
+  useQuery({
+    queryKey: keys.unread,
+    queryFn: () => api<{ unread: number }>('/inbox/unread-count'),
+    refetchInterval: 60_000,
+  })
+
+export const useInbox = (enabled: boolean) =>
+  useQuery({ queryKey: keys.inbox, queryFn: () => api<InboxPage>('/inbox?limit=15'), enabled })

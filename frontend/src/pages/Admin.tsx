@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { ClassNotesForm } from '../components/ClassNotesForm'
 import { AIModels } from '../components/admin/AIModels'
 import { Avatar, ErrorBanner, Icon } from '../components/ui'
@@ -25,6 +26,9 @@ export default function AdminPage() {
       <div>
         <h1 className="text-headline-lg text-ink md:text-[28px]">Admin</h1>
         <p className="text-body-md text-on-surface-variant">Manage challenges, members, the Friday Drop, WhatsApp nudges and AI models.</p>
+        <Link to="/admin/challenges" className="btn-secondary mt-3 w-fit">
+          <Icon name="fact_check" className="text-[18px]" /> Review proposed challenges
+        </Link>
       </div>
       <div className="grid gap-6 xl:grid-cols-2">
         <CreateChallenge />

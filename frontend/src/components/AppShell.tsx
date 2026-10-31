@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-do
 import { useLeaderboard } from '../lib/queries'
 import { useSession } from '../lib/session-context'
 import { useTheme } from '../lib/useTheme'
+import { NotificationBell } from './NotificationBell'
 import { Avatar, Icon, Logo, StreakPill, Wordmark } from './ui'
 
 const NAV = [
@@ -95,6 +96,9 @@ function UserMenu() {
           <Link to="/settings" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-surface-container-low">
             <Icon name="settings" className="text-[18px]" /> Settings
           </Link>
+          <Link to="/challenges/proposals" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-surface-container-low">
+            <Icon name="lightbulb" className="text-[18px]" /> My challenge proposals
+          </Link>
           <button
             onClick={toggle}
             className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-surface-container-low"
@@ -106,6 +110,11 @@ function UserMenu() {
           {user.is_admin && (
             <Link to="/admin" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-surface-container-low">
               <Icon name="admin_panel_settings" className="text-[18px]" /> Admin
+            </Link>
+          )}
+          {user.is_admin && (
+            <Link to="/admin/challenges" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-surface-container-low">
+              <Icon name="fact_check" className="text-[18px]" /> Challenge approvals
             </Link>
           )}
           {user.is_admin && (
@@ -178,6 +187,7 @@ export function AppShell() {
           </nav>
           <div className="flex items-center gap-3">
             {myRow && <StreakPill days={myRow.current_streak} className="hidden sm:inline-flex" />}
+            <NotificationBell />
             <UserMenu />
           </div>
         </div>
