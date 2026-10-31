@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.models import (
     Challenge,
+    ChallengeStatus,
     Enrollment,
     EnrollmentStats,
     Notification,
@@ -44,7 +45,9 @@ class LaggingMember:
 
 def active_challenges(db: Session, today: date) -> list[Challenge]:
     return list(
-        db.scalars(select(Challenge).where(Challenge.start_date <= today, Challenge.end_date >= today)).all()
+        db.scalars(select(Challenge).where(
+            Challenge.status == ChallengeStatus.approved, Challenge.start_date <= today, Challenge.end_date >= today
+        )).all()
     )
 
 
